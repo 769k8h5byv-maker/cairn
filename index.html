@@ -12,7 +12,6 @@
   --ink:#17221b;
   --muted:#69746d;
   --accent:#294b38;
-  --accent2:#41664e;
   --line:#d5ddd7;
   --danger:#a33b32;
 }
@@ -112,9 +111,6 @@ main{
 }
 
 .section-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
   margin:20px 0 10px;
 }
 
@@ -196,7 +192,7 @@ main{
   border:1px solid var(--line);
   background:white;
   border-radius:9px;
-  padding:7px 11px;
+  padding:8px 12px;
 }
 
 .friend-actions .delete{
@@ -216,6 +212,7 @@ main{
   background:var(--bg);
   padding:10px;
   border-radius:10px;
+  cursor:pointer;
 }
 
 .check-item input{
@@ -263,7 +260,9 @@ label{
   margin:12px 0 5px;
 }
 
-input,textarea,select{
+input,
+textarea,
+select{
   width:100%;
   padding:12px;
   border:1px solid var(--line);
@@ -380,19 +379,19 @@ that make your hikes worth remembering.
 <button class="fab" onclick="openHikeModal()">+</button>
 
 
-<!-- HIKE MODAL -->
+<!-- HIKE WINDOW -->
 
 <div class="modal" id="hikeModal">
 
 <div class="sheet">
 
-<h2>Log a Hike</h2>
+<h2>🥾 Log a Hike</h2>
 
 <label>Trail name</label>
-<input id="trail" placeholder="e.g. Cox Heath Mountain">
+<input id="trail" type="text" placeholder="e.g. Cox Heath Mountain">
 
 <label>Location</label>
-<input id="location" placeholder="e.g. Cape Breton Highlands">
+<input id="location" type="text" placeholder="e.g. Cape Breton Highlands">
 
 <label>Date</label>
 <input id="date" type="date">
@@ -416,14 +415,13 @@ that make your hikes worth remembering.
 </select>
 
 <label>Who came?</label>
-
 <div id="friendChecklist" class="check-list"></div>
 
 <label>Other people</label>
-<input id="otherFriends" placeholder="Anyone not in your Friends list">
+<input id="otherFriends" type="text" placeholder="Anyone not in your Friends list">
 
 <label>Weather</label>
-<input id="weather" placeholder="e.g. Sunny, 18°C">
+<input id="weather" type="text" placeholder="e.g. Sunny, 18°C">
 
 <label>Gear notes</label>
 <textarea id="gear" placeholder="What worked? What didn't?"></textarea>
@@ -445,7 +443,7 @@ that make your hikes worth remembering.
 </div>
 
 
-<!-- FRIENDS MODAL -->
+<!-- FRIENDS WINDOW -->
 
 <div class="modal" id="friendsModal">
 
@@ -456,22 +454,15 @@ that make your hikes worth remembering.
 <div id="friendsList"></div>
 
 <div class="actions">
-
-<button onclick="closeFriends()">
-Done
-</button>
-
-<button class="primary" onclick="openFriendForm()">
-+ Add Friend
-</button>
-
+<button onclick="closeFriends()">Done</button>
+<button class="primary" onclick="openFriendForm()">+ Add Friend</button>
 </div>
 
 </div>
 </div>
 
 
-<!-- FRIEND FORM -->
+<!-- ADD FRIEND WINDOW -->
 
 <div class="modal" id="friendFormModal">
 
@@ -479,30 +470,15 @@ Done
 
 <h2 id="friendFormTitle">Add Friend</h2>
 
-<label>Name</label>
+<label for="friendName">Name</label>
+<input id="friendName" type="text" placeholder="e.g. Wendy">
 
-<input
-id="friendName"
-placeholder="e.g. Wendy"
->
-
-<label>Optional note</label>
-
-<textarea
-id="friendNote"
-placeholder="Favourite trail, hiking style, etc."
-></textarea>
+<label for="friendNote">Optional note</label>
+<textarea id="friendNote" placeholder="Favourite trail, hiking style, etc."></textarea>
 
 <div class="actions">
-
-<button onclick="closeFriendForm()">
-Cancel
-</button>
-
-<button class="primary" onclick="saveFriend()">
-Save Friend
-</button>
-
+<button onclick="closeFriendForm()">Cancel</button>
+<button class="primary" onclick="saveFriend()">Save Friend</button>
 </div>
 
 </div>
@@ -511,26 +487,26 @@ Save Friend
 
 <script>
 
-/* Existing hikes are preserved */
+/* ---------------------------------
+   DATA
+--------------------------------- */
 
 let hikes =
 JSON.parse(
 localStorage.getItem("cairnHikes") || "[]"
 );
 
-
-/* Friends are stored separately */
-
 let friends =
 JSON.parse(
 localStorage.getItem("cairnFriends") || "[]"
 );
 
+let editingFriendIndex = null;
 
-let editingFriendIndex=null;
 
-
-/* Save hikes */
+/* ---------------------------------
+   STORAGE
+--------------------------------- */
 
 function saveHikes(){
 
@@ -540,9 +516,6 @@ JSON.stringify(hikes)
 );
 
 }
-
-
-/* Save friends */
 
 function saveFriends(){
 
@@ -554,41 +527,37 @@ JSON.stringify(friends)
 }
 
 
-/* Render hikes */
+/* ---------------------------------
+   HOME / HIKES
+--------------------------------- */
 
 function render(){
 
-let box=
+const box =
 document.getElementById("hikes");
 
 if(!hikes.length){
 
-box.innerHTML=`
-
+box.innerHTML = `
 <div class="empty">
-
-🥾
-
-<p>No hikes yet.</p>
-
+<div style="font-size:42px">🥾</div>
+<p><strong>No hikes yet.</strong></p>
 <p>Your first adventure belongs here.</p>
-
 </div>
-
 `;
 
 return;
-
 }
 
-let sorted=
+const sorted =
 [...hikes].sort(
-(a,b)=>
-new Date(b.date)-new Date(a.date)
+(a,b) =>
+new Date(b.date || 0) -
+new Date(a.date || 0)
 );
 
-box.innerHTML=
-sorted.slice(0,10).map(h=>`
+box.innerHTML =
+sorted.slice(0,10).map(h => `
 
 <div class="hike-card">
 
@@ -607,17 +576,17 @@ ${esc(h.difficulty || "Difficulty not entered")}
 <div class="stats">
 
 <div class="stat">
-<strong>${h.distance || "—"}</strong>
+<strong>${esc(h.distance || "—")}</strong>
 <span>KM</span>
 </div>
 
 <div class="stat">
-<strong>${h.elevation || "—"}</strong>
+<strong>${esc(h.elevation || "—")}</strong>
 <span>METRES</span>
 </div>
 
 <div class="stat">
-<strong>${h.pack || "—"}</strong>
+<strong>${esc(h.pack || "—")}</strong>
 <span>LB PACK</span>
 </div>
 
@@ -661,7 +630,9 @@ style="width:100%;margin-top:12px;border-radius:12px"
 }
 
 
-/* Open hike form */
+/* ---------------------------------
+   HIKE MODAL
+--------------------------------- */
 
 function openHikeModal(){
 
@@ -671,15 +642,17 @@ document
 
 document
 .getElementById("date")
-.value=
+.value =
 new Date().toISOString().split("T")[0];
 
 renderFriendChecklist();
 
+setTimeout(() => {
+document.getElementById("trail").focus();
+},100);
+
 }
 
-
-/* Close hike form */
 
 function closeHikeModal(){
 
@@ -690,35 +663,39 @@ document
 }
 
 
-/* Friend checklist */
+/* ---------------------------------
+   FRIEND CHECKBOXES
+--------------------------------- */
 
 function renderFriendChecklist(){
 
-let box=
+const box =
 document.getElementById("friendChecklist");
 
 if(!friends.length){
 
-box.innerHTML=
-`<div style="color:#69746d">
-No friends added yet. Add them from the Friends section.
-</div>`;
+box.innerHTML = `
+<div style="color:#69746d">
+No friends added yet. Add some from the Friends section.
+</div>
+`;
 
 return;
-
 }
 
-box.innerHTML=
-friends.map((f,i)=>`
+box.innerHTML =
+friends.map((friend,index) => `
 
 <label class="check-item">
 
 <input
 type="checkbox"
-value="${i}"
+value="${index}"
 >
 
-<span>${esc(f.name)}</span>
+<span>
+${esc(friend.name)}
+</span>
 
 </label>
 
@@ -727,11 +704,13 @@ value="${i}"
 }
 
 
-/* Save hike */
+/* ---------------------------------
+   SAVE HIKE
+--------------------------------- */
 
 function saveHike(){
 
-let trail=
+const trail =
 document.getElementById("trail")
 .value.trim();
 
@@ -740,42 +719,39 @@ if(!trail){
 alert("Please enter a trail name.");
 
 return;
-
 }
 
-
-let selected=[];
+let selectedFriends = [];
 
 document
 .querySelectorAll("#friendChecklist input:checked")
-.forEach(box=>{
+.forEach(box => {
 
-let friend=
+const friend =
 friends[Number(box.value)];
 
 if(friend){
-
-selected.push(friend.name);
-
+selectedFriends.push(friend.name);
 }
 
 });
 
 
-let other=
+const otherFriends =
 document
 .getElementById("otherFriends")
 .value.trim();
 
-
-if(other){
-
-selected.push(other);
-
+if(otherFriends){
+selectedFriends.push(otherFriends);
 }
 
 
-let hike={
+const preview =
+document.getElementById("photoPreview");
+
+
+const hike = {
 
 trail:trail,
 
@@ -810,7 +786,7 @@ document
 .value,
 
 friends:
-selected.join(", "),
+selectedFriends.join(", "),
 
 weather:
 document
@@ -828,25 +804,14 @@ document
 .value.trim(),
 
 photo:
-document
-getElementByIdSafe("photoPreview")
+preview.src &&
+preview.src.startsWith("data:")
+?
+preview.src
+:
+""
 
 };
-
-
-let preview=
-document.getElementById("photoPreview");
-
-if(preview.src &&
-preview.src.startsWith("data:")){
-
-hike.photo=preview.src;
-
-}else{
-
-hike.photo="";
-
-}
 
 
 hikes.push(hike);
@@ -862,16 +827,44 @@ closeHikeModal();
 }
 
 
-/* Helper */
+/* ---------------------------------
+   PHOTO
+--------------------------------- */
 
-function getElementByIdSafe(id){
+function previewPhoto(event){
 
-return "";
+const file =
+event.target.files[0];
+
+if(!file){
+return;
+}
+
+const reader =
+new FileReader();
+
+reader.onload =
+function(e){
+
+const img =
+document.getElementById("photoPreview");
+
+img.src =
+e.target.result;
+
+img.style.display =
+"block";
+
+};
+
+reader.readAsDataURL(file);
 
 }
 
 
-/* Clear hike form */
+/* ---------------------------------
+   CLEAR HIKE FORM
+--------------------------------- */
 
 function clearHikeForm(){
 
@@ -885,70 +878,34 @@ function clearHikeForm(){
 "weather",
 "gear",
 "notes"
-].forEach(id=>{
+]
+.forEach(id => {
 
 document
 .getElementById(id)
-.value="";
+.value = "";
 
 });
 
-document
-.querySelectorAll("#friendChecklist input")
-.forEach(box=>{
-
-box.checked=false;
-
-});
 
 document
 .getElementById("photo")
-.value="";
+.value = "";
 
 document
 .getElementById("photoPreview")
-.src="";
+.src = "";
 
 document
 .getElementById("photoPreview")
-.style.display="none";
+.style.display = "none";
 
 }
 
 
-/* Photo preview */
-
-function previewPhoto(event){
-
-let file=
-event.target.files[0];
-
-if(!file){
-
-return;
-
-}
-
-let reader=
-new FileReader();
-
-reader.onload=function(e){
-
-let img=
-document.getElementById("photoPreview");
-
-img.src=e.target.result;
-
-img.style.display="block";
-
-};
-
-reader.readAsDataURL(file);
-
-}
-
-
-/* Friends screen */
+/* ---------------------------------
+   FRIENDS
+--------------------------------- */
 
 function showFriends(){
 
@@ -970,22 +927,20 @@ document
 }
 
 
-/* Render friends */
-
 function renderFriends(){
 
-let box=
+const box =
 document.getElementById("friendsList");
 
 if(!friends.length){
 
-box.innerHTML=`
+box.innerHTML = `
 
 <div class="empty">
 
-👥
+<div style="font-size:40px">👥</div>
 
-<p>No friends yet.</p>
+<p><strong>No friends yet.</strong></p>
 
 <p>Add your hiking crew!</p>
 
@@ -994,37 +949,35 @@ box.innerHTML=`
 `;
 
 return;
-
 }
 
-box.innerHTML=
-friends.map((f,i)=>`
+
+box.innerHTML =
+friends.map((friend,index) => `
 
 <div class="friend-card">
 
 <div class="friend-name">
-👤 ${esc(f.name)}
+👤 ${esc(friend.name)}
 </div>
 
-${
-f.note
-?
-`<div class="note">${esc(f.note)}</div>`
-:
-""
-}
+${friend.note ? `
+<div class="note">
+${esc(friend.note)}
+</div>
+` : ""}
 
 <div class="friend-actions">
 
 <button
-onclick="editFriend(${i})"
+onclick="editFriend(${index})"
 >
 ✏️ Edit
 </button>
 
 <button
 class="delete"
-onclick="deleteFriend(${i})"
+onclick="deleteFriend(${index})"
 >
 🗑 Delete
 </button>
@@ -1038,59 +991,86 @@ onclick="deleteFriend(${i})"
 }
 
 
-/* Add friend */
+/* ---------------------------------
+   ADD FRIEND
+--------------------------------- */
 
 function openFriendForm(){
 
-editingFriendIndex=null;
+editingFriendIndex = null;
 
 document
 .getElementById("friendFormTitle")
-.textContent="Add Friend";
+.textContent =
+"Add Friend";
 
 document
 .getElementById("friendName")
-.value="";
+.value = "";
 
 document
 .getElementById("friendNote")
-.value="";
+.value = "";
 
 document
 .getElementById("friendFormModal")
 .classList.add("open");
 
-}
-
-
-/* Edit friend */
-
-function editFriend(i){
-
-editingFriendIndex=i;
-
-let f=friends[i];
-
-document
-.getElementById("friendFormTitle")
-.textContent="Edit Friend";
+setTimeout(() => {
 
 document
 .getElementById("friendName")
-.value=f.name;
+.focus();
+
+},100);
+
+}
+
+
+/* ---------------------------------
+   EDIT FRIEND
+--------------------------------- */
+
+function editFriend(index){
+
+editingFriendIndex = index;
+
+const friend =
+friends[index];
+
+document
+.getElementById("friendFormTitle")
+.textContent =
+"Edit Friend";
+
+document
+.getElementById("friendName")
+.value =
+friend.name;
 
 document
 .getElementById("friendNote")
-.value=f.note || "";
+.value =
+friend.note || "";
 
 document
 .getElementById("friendFormModal")
 .classList.add("open");
 
+setTimeout(() => {
+
+document
+.getElementById("friendName")
+.focus();
+
+},100);
+
 }
 
 
-/* Close friend form */
+/* ---------------------------------
+   CLOSE FRIEND FORM
+--------------------------------- */
 
 function closeFriendForm(){
 
@@ -1101,30 +1081,36 @@ document
 }
 
 
-/* Save friend */
+/* ---------------------------------
+   SAVE FRIEND
+--------------------------------- */
 
 function saveFriend(){
 
-let name=
+const name =
 document
 .getElementById("friendName")
 .value.trim();
 
-let note=
+const note =
 document
 .getElementById("friendNote")
 .value.trim();
 
+
 if(!name){
 
-alert("Please enter a friend's name.");
+alert("Please enter your friend's name.");
+
+document
+.getElementById("friendName")
+.focus();
 
 return;
-
 }
 
 
-if(editingFriendIndex===null){
+if(editingFriendIndex === null){
 
 friends.push({
 
@@ -1135,9 +1121,12 @@ note:note
 
 }else{
 
-friends[editingFriendIndex].name=name;
+friends[editingFriendIndex] = {
 
-friends[editingFriendIndex].note=note;
+name:name,
+note:note
+
+};
 
 }
 
@@ -1151,22 +1140,24 @@ closeFriendForm();
 }
 
 
-/* Delete friend */
+/* ---------------------------------
+   DELETE FRIEND
+--------------------------------- */
 
-function deleteFriend(i){
+function deleteFriend(index){
 
-let confirmed=
-confirm(
-"Remove "+friends[i].name+" from your Friends list?"
-);
+const name =
+friends[index].name;
 
-if(!confirmed){
+if(!confirm(
+"Remove " + name + " from your Friends list?"
+)){
 
 return;
 
 }
 
-friends.splice(i,1);
+friends.splice(index,1);
 
 saveFriends();
 
@@ -1175,38 +1166,43 @@ renderFriends();
 }
 
 
-/* Stats */
+/* ---------------------------------
+   STATS
+--------------------------------- */
 
 function showStats(){
 
-let count=hikes.length;
+const count =
+hikes.length;
 
-let distance=
+const distance =
 hikes.reduce(
-(sum,h)=>
-sum+(Number(h.distance)||0),
+(sum,h) =>
+sum + (Number(h.distance) || 0),
 0
 );
 
-let elevation=
+const elevation =
 hikes.reduce(
-(sum,h)=>
-sum+(Number(h.elevation)||0),
+(sum,h) =>
+sum + (Number(h.elevation) || 0),
 0
 );
 
 alert(
 
-"YOUR CAIRN STATS\n\n"+
+"YOUR CAIRN STATS\n\n" +
 
-"Hikes: "+count+"\n"+
+"Hikes: " +
+count +
+"\n\n" +
 
-"Distance: "+
-distance.toFixed(1)+
-" km\n"+
+"Distance: " +
+distance.toFixed(1) +
+" km\n\n" +
 
-"Elevation: "+
-Math.round(elevation)+
+"Elevation: " +
+Math.round(elevation) +
 " m"
 
 );
@@ -1214,14 +1210,16 @@ Math.round(elevation)+
 }
 
 
-/* Gear */
+/* ---------------------------------
+   GEAR
+--------------------------------- */
 
 function showGear(){
 
-let notes=
+const notes =
 hikes
-.filter(h=>h.gear)
-.map(h=>"• "+h.gear)
+.filter(h => h.gear)
+.map(h => "• " + h.gear)
 .join("\n");
 
 alert(
@@ -1230,7 +1228,7 @@ notes
 
 ?
 
-"GEAR NOTES\n\n"+notes
+"GEAR NOTES\n\n" + notes
 
 :
 
@@ -1241,14 +1239,16 @@ notes
 }
 
 
-/* Escape HTML */
+/* ---------------------------------
+   SECURITY
+--------------------------------- */
 
-function esc(s){
+function esc(value){
 
-return String(s).replace(
+return String(value).replace(
 /[&<>"']/g,
 
-ch=>({
+char => ({
 
 "&":"&amp;",
 "<":"&lt;",
@@ -1256,14 +1256,16 @@ ch=>({
 '"':"&quot;",
 "'":"&#39;"
 
-}[ch])
+}[char])
 
 );
 
 }
 
 
-/* Start */
+/* ---------------------------------
+   START
+--------------------------------- */
 
 render();
 
