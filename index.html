@@ -1,1 +1,1016 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
+<title>Cairn</title>
+
+<style>
+
+:root{
+  --bg:#edf1ec;
+  --card:#ffffff;
+  --ink:#17221b;
+  --muted:#69746d;
+  --accent:#294b38;
+  --accent2:#41664e;
+  --line:#d5ddd7;
+  --gold:#b48632;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+}
+
+header{
+  background:linear-gradient(145deg,#213d2d,#41664e);
+  color:white;
+  padding:30px 20px 26px;
+}
+
+.brand{
+  max-width:720px;
+  margin:auto;
+}
+
+.logo{
+  font-size:42px;
+  margin-bottom:4px;
+}
+
+header h1{
+  margin:0;
+  font-size:32px;
+  letter-spacing:.2px;
+}
+
+header p{
+  margin:5px 0 0;
+  opacity:.85;
+  font-size:15px;
+}
+
+main{
+  max-width:720px;
+  margin:auto;
+  padding:18px 16px 100px;
+}
+
+.hero{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:16px;
+}
+
+.hero h2{
+  margin:0 0 6px;
+}
+
+.hero p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.4;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.menu{
+  border:1px solid var(--line);
+  background:white;
+  border-radius:16px;
+  padding:17px 14px;
+  text-align:left;
+  font-size:16px;
+  color:var(--ink);
+}
+
+.menu .icon{
+  display:block;
+  font-size:27px;
+  margin-bottom:7px;
+}
+
+.menu strong{
+  display:block;
+}
+
+.menu span{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:20px 0 10px;
+}
+
+.section-title h2{
+  margin:0;
+  font-size:20px;
+}
+
+.hike-card{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  margin:10px 0;
+}
+
+.hike-title{
+  font-size:20px;
+  font-weight:800;
+}
+
+.hike-location{
+  color:var(--muted);
+  margin-top:3px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:14px;
+}
+
+.stat{
+  background:var(--bg);
+  border-radius:10px;
+  padding:9px;
+  text-align:center;
+}
+
+.stat strong{
+  display:block;
+  font-size:16px;
+}
+
+.stat span{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.note{
+  margin-top:11px;
+  line-height:1.4;
+}
+
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:28px 10px;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0008;
+  padding:18px;
+  align-items:center;
+  justify-content:center;
+  z-index:20;
+}
+
+.modal.open{
+  display:flex;
+}
+
+.sheet{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  width:min(620px,100%);
+  max-height:92vh;
+  overflow:auto;
+}
+
+.sheet h2{
+  margin-top:0;
+}
+
+label{
+  display:block;
+  font-weight:650;
+  margin:12px 0 5px;
+}
+
+input,textarea,select{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  font-size:16px;
+  background:white;
+}
+
+textarea{
+  min-height:80px;
+  resize:vertical;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+
+.actions button{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  font-size:16px;
+}
+
+.primary{
+  background:var(--accent);
+  color:white;
+}
+
+.danger{
+  color:#a33b32;
+}
+
+.photo-preview{
+  margin-top:8px;
+  max-width:100%;
+  max-height:180px;
+  border-radius:12px;
+  display:none;
+}
+
+.badge{
+  display:inline-block;
+  background:#e6eee8;
+  color:var(--accent);
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  margin-top:9px;
+}
+
+.fab{
+  position:fixed;
+  right:20px;
+  bottom:22px;
+  width:58px;
+  height:58px;
+  border:0;
+  border-radius:50%;
+  background:var(--accent);
+  color:white;
+  font-size:30px;
+  box-shadow:0 4px 14px #0004;
+  z-index:15;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="brand">
+
+<div class="logo">🥾</div>
+
+<h1>Cairn</h1>
+
+<p>Every trail has a story.</p>
+
+</div>
+
+</header>
+
+
+<main>
+
+<div class="hero">
+
+<h2>Your adventures</h2>
+
+<p>
+Keep track of the trails, people, gear and memories
+that make your hikes worth remembering.
+</p>
+
+</div>
+
+
+<div class="grid">
+
+<button class="menu" onclick="openHikeModal()">
+
+<span class="icon">🥾</span>
+
+<strong>Log a Hike</strong>
+
+<span>Record a new adventure</span>
+
+</button>
+
+
+<button class="menu" onclick="showFriends()">
+
+<span class="icon">👥</span>
+
+<strong>Friends</strong>
+
+<span>Your hiking crew</span>
+
+</button>
+
+
+<button class="menu" onclick="showStats()">
+
+<span class="icon">📊</span>
+
+<strong>My Stats</strong>
+
+<span>Your hiking history</span>
+
+</button>
+
+
+<button class="menu" onclick="showGear()">
+
+<span class="icon">🎒</span>
+
+<strong>Gear</strong>
+
+<span>What works on the trail</span>
+
+</button>
+
+</div>
+
+
+<div class="section-title">
+
+<h2>Recent hikes</h2>
+
+</div>
+
+<div id="hikes"></div>
+
+</main>
+
+
+<button class="fab" onclick="openHikeModal()">+</button>
+
+
+<!-- HIKE FORM -->
+
+<div class="modal" id="modal">
+
+<div class="sheet">
+
+<h2 id="modalTitle">Log a Hike</h2>
+
+
+<label>Trail name</label>
+
+<input
+id="trail"
+placeholder="e.g. Cox Heath Mountain"
+>
+
+
+<label>Location</label>
+
+<input
+id="location"
+placeholder="e.g. Cape Breton Highlands"
+>
+
+
+<label>Date</label>
+
+<input
+id="date"
+type="date"
+>
+
+
+<label>Distance (km)</label>
+
+<input
+id="distance"
+type="number"
+step="0.1"
+placeholder="e.g. 5.2"
+>
+
+
+<label>Elevation gain (m)</label>
+
+<input
+id="elevation"
+type="number"
+placeholder="e.g. 320"
+>
+
+
+<label>Pack weight (lb)</label>
+
+<input
+id="pack"
+type="number"
+step="0.1"
+placeholder="e.g. 30"
+>
+
+
+<label>Difficulty</label>
+
+<select id="difficulty">
+
+<option>Easy</option>
+<option>Moderate</option>
+<option>Challenging</option>
+<option>Hard</option>
+<option>Epic</option>
+
+</select>
+
+
+<label>Who came?</label>
+
+<input
+id="friends"
+placeholder="e.g. Wendy, Sarah and Mike"
+>
+
+
+<label>Weather</label>
+
+<input
+id="weather"
+placeholder="e.g. Sunny, 18°C"
+>
+
+
+<label>Gear notes</label>
+
+<textarea
+id="gear"
+placeholder="What worked? What didn't?"
+></textarea>
+
+
+<label>Trail notes</label>
+
+<textarea
+id="notes"
+placeholder="What do you want to remember about this hike?"
+></textarea>
+
+
+<label>Photo</label>
+
+<input
+id="photo"
+type="file"
+accept="image/*"
+onchange="previewPhoto(event)"
+>
+
+<img
+id="photoPreview"
+class="photo-preview"
+>
+
+
+<div class="actions">
+
+<button onclick="closeModal()">
+Cancel
+</button>
+
+<button
+class="primary"
+onclick="saveHike()"
+>
+Save Hike
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+
+/* Load saved hikes */
+
+let hikes =
+JSON.parse(
+localStorage.getItem("cairnHikes") || "[]"
+);
+
+
+/* Save */
+
+function save(){
+
+localStorage.setItem(
+"cairnHikes",
+JSON.stringify(hikes)
+);
+
+}
+
+
+/* Display hikes */
+
+function render(){
+
+let box=
+document.getElementById("hikes");
+
+
+if(!hikes.length){
+
+box.innerHTML=`
+
+<div class="empty">
+
+🥾
+
+<p>
+No hikes yet.
+</p>
+
+<p>
+Your first adventure belongs here.
+</p>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+let sorted=
+[...hikes].sort(
+(a,b)=>
+new Date(b.date)-new Date(a.date)
+);
+
+
+box.innerHTML=
+sorted.slice(0,10).map(h=>`
+
+<div class="hike-card">
+
+<div class="hike-title">
+${esc(h.trail)}
+</div>
+
+<div class="hike-location">
+📍 ${esc(h.location || "Location not entered")}
+</div>
+
+<div class="badge">
+${esc(h.difficulty)}
+</div>
+
+
+<div class="stats">
+
+<div class="stat">
+
+<strong>
+${h.distance || "—"}
+</strong>
+
+<span>KM</span>
+
+</div>
+
+
+<div class="stat">
+
+<strong>
+${h.elevation || "—"}
+</strong>
+
+<span>METRES</span>
+
+</div>
+
+
+<div class="stat">
+
+<strong>
+${h.pack || "—"}
+</strong>
+
+<span>LB PACK</span>
+
+</div>
+
+</div>
+
+
+${h.friends ? `
+<div class="note">
+👥 <b>With:</b> ${esc(h.friends)}
+</div>
+` : ""}
+
+
+${h.weather ? `
+<div class="note">
+🌦️ ${esc(h.weather)}
+</div>
+` : ""}
+
+
+${h.notes ? `
+<div class="note">
+📝 ${esc(h.notes)}
+</div>
+` : ""}
+
+
+${h.gear ? `
+<div class="note">
+🎒 <b>Gear:</b> ${esc(h.gear)}
+</div>
+` : ""}
+
+
+${
+h.photo
+?
+`<img
+src="${h.photo}"
+style="width:100%;margin-top:12px;border-radius:12px"
+>`
+:
+""
+}
+
+
+</div>
+
+`).join("");
+
+}
+
+
+/* Open form */
+
+function openHikeModal(){
+
+document
+.getElementById("modal")
+.classList
+.add("open");
+
+
+document
+.getElementById("modalTitle")
+.textContent="Log a Hike";
+
+
+document
+.getElementById("date")
+.value=
+new Date().toISOString().split("T")[0];
+
+}
+
+
+/* Close */
+
+function closeModal(){
+
+document
+.getElementById("modal")
+.classList
+.remove("open");
+
+}
+
+
+/* Save hike */
+
+function saveHike(){
+
+let trail=
+document.getElementById("trail")
+.value.trim();
+
+
+if(!trail){
+
+alert("Please enter a trail name.");
+
+return;
+
+}
+
+
+let hike={
+
+trail:trail,
+
+location:
+document
+.getElementById("location")
+.value.trim(),
+
+date:
+document
+.getElementById("date")
+.value,
+
+distance:
+document
+.getElementById("distance")
+.value,
+
+elevation:
+document
+.getElementById("elevation")
+.value,
+
+pack:
+document
+.getElementById("pack")
+.value,
+
+difficulty:
+document
+.getElementById("difficulty")
+.value,
+
+friends:
+document
+.getElementById("friends")
+.value.trim(),
+
+weather:
+document
+.getElementById("weather")
+.value.trim(),
+
+gear:
+document
+.getElementById("gear")
+.value.trim(),
+
+notes:
+document
+.getElementById("notes")
+.value.trim(),
+
+photo:
+document
+.getElementById("photoPreview")
+.src || ""
+
+};
+
+
+if(hike.photo.startsWith("data:")){
+
+/* keep photo */
+
+}else{
+
+hike.photo="";
+
+}
+
+
+hikes.push(hike);
+
+save();
+
+render();
+
+clearForm();
+
+closeModal();
+
+}
+
+
+/* Photo preview */
+
+function previewPhoto(event){
+
+let file=
+event.target.files[0];
+
+if(!file){
+
+return;
+
+}
+
+
+let reader=
+new FileReader();
+
+
+reader.onload=function(e){
+
+let img=
+document
+.getElementById("photoPreview");
+
+img.src=e.target.result;
+
+img.style.display="block";
+
+};
+
+
+reader.readAsDataURL(file);
+
+}
+
+
+/* Clear form */
+
+function clearForm(){
+
+[
+"trail",
+"location",
+"distance",
+"elevation",
+"pack",
+"friends",
+"weather",
+"gear",
+"notes"
+]
+
+.forEach(id=>{
+
+document
+.getElementById(id)
+.value="";
+
+});
+
+
+document
+.getElementById("photo")
+.value="";
+
+
+document
+.getElementById("photoPreview")
+.src="";
+
+
+document
+.getElementById("photoPreview")
+.style.display="none";
+
+}
+
+
+/* Friends */
+
+function showFriends(){
+
+alert(
+"Friends will be added here next.\n\nWe'll be able to create hiking profiles and see who has joined each adventure."
+);
+
+}
+
+
+/* Stats */
+
+function showStats(){
+
+let count=hikes.length;
+
+let distance=
+hikes.reduce(
+(sum,h)=>
+sum+(Number(h.distance)||0),
+0
+);
+
+let elevation=
+hikes.reduce(
+(sum,h)=>
+sum+(Number(h.elevation)||0),
+0
+);
+
+
+alert(
+
+"YOUR CAIRN STATS\n\n"+
+
+"Hikes: "+count+"\n"+
+
+"Distance: "+
+distance.toFixed(1)+
+" km\n"+
+
+"Elevation: "+
+Math.round(elevation)+
+" m"
+
+);
+
+}
+
+
+/* Gear */
+
+function showGear(){
+
+let notes=
+hikes
+.filter(h=>h.gear)
+.map(h=>"• "+h.gear)
+.join("\n");
+
+
+alert(
+
+notes
+
+?
+
+"GEAR NOTES\n\n"+notes
+
+:
+
+"No gear notes yet.\n\nAdd gear notes when you log a hike."
+
+);
+
+}
+
+
+/* Escape HTML */
+
+function esc(s){
+
+return String(s).replace(
+/[&<>"']/g,
+
+ch=>({
+
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+
+}[ch])
+
+);
+
+}
+
+
+/* Start */
+
+render();
+
+</script>
+
+</body>
+</html>
