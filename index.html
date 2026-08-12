@@ -336,6 +336,20 @@ textarea{
   text-decoration:none;
 }
 
+.share-button{
+  display:block;
+  margin-top:8px;
+  width:100%;
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#f5f8f5;
+  color:var(--accent);
+  font-size:15px;
+  font-weight:650;
+  cursor:pointer;
+}
+
 .gps-button{
   margin-top:8px;
   width:100%;
@@ -726,12 +740,6 @@ Save Friend
 
 /* =====================================================
    CAIRN SUPABASE CONNECTION
-   =====================================================
-
-   REPLACE ONLY THE TWO VALUES BELOW.
-
-   Do NOT put your database password here.
-   Do NOT put a service_role or secret key here.
    ===================================================== */
 
 const SUPABASE_URL =
@@ -739,7 +747,6 @@ const SUPABASE_URL =
 
 const SUPABASE_KEY =
 "sb_publishable__ad1TkvwWaMbTdpFf4o0tg_7BfOpo-W";
-
 
 const db =
 supabase.createClient(
@@ -1202,7 +1209,7 @@ return;
 box.innerHTML =
 hikes
 .slice(0,10)
-.map(h => `
+.map((h,index) => `
 
 <div class="hike-card">
 
@@ -1331,10 +1338,236 @@ target="_blank"
 }
 
 
+<button
+class="share-button"
+onclick="shareHike(${index})"
+>
+🌲 Share Hike with Hiking Buds
+</button>
+
+
 </div>
 
 `)
 .join("");
+
+}
+
+
+/* =====================================================
+   SHARE HIKE
+   ===================================================== */
+
+async function shareHike(index){
+
+const hike =
+hikes[index];
+
+
+if(!hike){
+
+return;
+
+}
+
+
+let shareText =
+"🥾 Cairn — " +
+(hike.trail || "Hike") +
+"\n\n";
+
+
+if(hike.location){
+
+shareText +=
+"📍 " +
+hike.location +
+"\n";
+
+}
+
+
+if(hike.hike_date){
+
+shareText +=
+"📅 " +
+hike.hike_date +
+"\n";
+
+}
+
+
+if(hike.distance){
+
+shareText +=
+"📏 " +
+hike.distance +
+" km\n";
+
+}
+
+
+if(hike.elevation){
+
+shareText +=
+"⛰️ " +
+hike.elevation +
+" m elevation\n";
+
+}
+
+
+if(hike.pack){
+
+shareText +=
+"🎒 " +
+hike.pack +
+" lb pack\n";
+
+}
+
+
+if(hike.difficulty){
+
+shareText +=
+"🥾 Difficulty: " +
+hike.difficulty +
+"\n";
+
+}
+
+
+if(hike.friends){
+
+shareText +=
+"👥 With: " +
+hike.friends +
+"\n";
+
+}
+
+
+if(hike.weather){
+
+shareText +=
+"🌦️ " +
+hike.weather +
+"\n";
+
+}
+
+
+if(hike.notes){
+
+shareText +=
+"\n📝 " +
+hike.notes +
+"\n";
+
+}
+
+
+if(hike.gear){
+
+shareText +=
+"\n🎒 Gear: " +
+hike.gear +
+"\n";
+
+}
+
+
+if(hike.latitude && hike.longitude){
+
+const mapUrl =
+"https://www.google.com/maps/search/?api=1&query=" +
+encodeURIComponent(
+hike.latitude + "," + hike.longitude
+);
+
+shareText +=
+"\n🗺️ Trailhead:\n" +
+mapUrl +
+"\n";
+
+}
+
+
+shareText +=
+"\n🌲 Shared from Cairn — Every trail has a story.";
+
+
+try{
+
+if(navigator.share){
+
+await navigator.share({
+
+title:
+"Cairn — " +
+(hike.trail || "My Hike"),
+
+text:
+shareText
+
+});
+
+}else{
+
+await copyShareText(shareText);
+
+}
+
+}catch(error){
+
+if(error.name !== "AbortError"){
+
+await copyShareText(shareText);
+
+}
+
+}
+
+}
+
+
+/* =====================================================
+   COPY SHARE TEXT
+   ===================================================== */
+
+async function copyShareText(text){
+
+try{
+
+await navigator.clipboard.writeText(text);
+
+alert(
+"🌲 Hike copied!\n\n" +
+"Paste it into a message to your hiking bud."
+);
+
+}catch(error){
+
+const temp =
+document.createElement("textarea");
+
+temp.value =
+text;
+
+document.body.appendChild(temp);
+
+temp.select();
+
+document.execCommand("copy");
+
+temp.remove();
+
+alert(
+"🌲 Hike copied!\n\n" +
+"Paste it into a message to your hiking bud."
+);
+
+}
 
 }
 
