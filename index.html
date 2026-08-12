@@ -219,6 +219,32 @@ main{
   color:var(--danger);
 }
 
+.hike-actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+
+.hike-actions button{
+  flex:1;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:white;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.hike-actions .share{
+  background:var(--accent);
+  color:white;
+  border-color:var(--accent);
+}
+
+.hike-actions .delete{
+  color:var(--danger);
+}
+
 .check-list{
   display:grid;
   gap:8px;
@@ -880,7 +906,6 @@ window.addEventListener(
 start
 );
 
-
 async function start(){
 
 const {
@@ -1420,18 +1445,96 @@ target="_blank"
 }
 
 
+<div class="hike-actions">
+
 <button
-class="share-button"
+class="share"
 onclick="openShareModal(${index})"
 >
 🥾 Share Hike
 </button>
+
+<button
+class="delete"
+onclick="deleteHike('${h.id}')"
+>
+🗑 Delete
+</button>
+
+</div>
 
 
 </div>
 
 `)
 .join("");
+
+}
+
+
+/* =====================================================
+   DELETE HIKE
+   ===================================================== */
+
+async function deleteHike(id){
+
+const hike =
+hikes.find(
+h => h.id === id
+);
+
+if(!hike){
+
+return;
+
+}
+
+const confirmed =
+confirm(
+'Delete "' +
+(hike.trail || "this hike") +
+'"?\n\nThis cannot be undone.'
+);
+
+if(!confirmed){
+
+return;
+
+}
+
+
+const {
+error
+} =
+await db
+.from("hikes")
+.delete()
+.eq(
+"id",
+id
+);
+
+
+if(error){
+
+alert(
+"Couldn't delete hike:\n\n" +
+error.message
+);
+
+return;
+
+}
+
+
+/* Remove it immediately from the local list */
+
+hikes =
+hikes.filter(
+h => h.id !== id
+);
+
+render();
 
 }
 
@@ -1454,10 +1557,8 @@ return;
 const h =
 hikeBeingShared;
 
-
 const shareText =
 buildShareText(h);
-
 
 const photoHTML =
 h.photo
@@ -1471,7 +1572,6 @@ src="${h.photo}"
 :
 "";
 
-
 document
 .getElementById("sharePreview")
 .innerHTML = `
@@ -1484,12 +1584,10 @@ ${photoHTML}
 
 `;
 
-
 document
 .getElementById("shareMessage")
 textContent =
 "";
-
 
 document
 .getElementById("shareModal")
@@ -1516,7 +1614,6 @@ let text =
 "🥾 " +
 (h.trail || "My Hike") +
 "\n\n";
-
 
 if(h.location){
 
@@ -1642,7 +1739,7 @@ day:"numeric"
 
 
 /* =====================================================
-   NATIVE PHONE / DESKTOP SHARING
+   NATIVE SHARING
    ===================================================== */
 
 async function nativeShare(){
@@ -1659,12 +1756,9 @@ hikeBeingShared;
 const text =
 buildShareText(h);
 
-
 try{
 
-if(
-navigator.share
-){
+if(navigator.share){
 
 let shareData = {
 
@@ -1675,7 +1769,6 @@ title:
 text:text
 
 };
-
 
 if(
 h.photo &&
@@ -1713,7 +1806,6 @@ e
 
 }
 
-
 await navigator.share(
 shareData
 );
@@ -1721,7 +1813,6 @@ shareData
 return;
 
 }
-
 
 await copyText(text);
 
@@ -1757,32 +1848,18 @@ showShareMessage(
 
 function shareFacebook(){
 
-const h =
-hikeBeingShared;
-
-if(!h){
+if(!hikeBeingShared){
 
 return;
 
 }
 
-
-/*
-Facebook does not allow a website to force
-a post into a particular group.
-
-Instead we open Facebook's share window.
-The user chooses where to post.
-*/
-
 const shareUrl =
 window.location.href;
-
 
 const facebookURL =
 "https://www.facebook.com/sharer/sharer.php?u=" +
 encodeURIComponent(shareUrl);
-
 
 window.open(
 facebookURL,
@@ -1790,16 +1867,15 @@ facebookURL,
 "width=700,height=600"
 );
 
-
 showShareMessage(
-"Facebook opened. Choose your hiking group there. You can use 'Copy post' below for the Cairn details."
+"Facebook opened. Choose your hiking group there. Use 'Copy post' if you want the full Cairn details."
 );
 
 }
 
 
 /* =====================================================
-   COPY FACEBOOK GROUP POST
+   COPY GROUP POST
    ===================================================== */
 
 async function copyShareText(){
@@ -1814,7 +1890,6 @@ const text =
 buildShareText(
 hikeBeingShared
 );
-
 
 try{
 
@@ -1850,9 +1925,6 @@ return;
 
 }
 
-
-/* Older-browser fallback */
-
 const textarea =
 document.createElement("textarea");
 
@@ -1870,6 +1942,7 @@ document
 .appendChild(textarea);
 
 textarea.focus();
+
 textarea.select();
 
 document.execCommand(
@@ -1890,10 +1963,6 @@ message;
 
 }
 
-
-/* =====================================================
-   PHOTO CONVERSION FOR PHONE SHARING
-   ===================================================== */
 
 async function dataUrlToFile(
 dataUrl,
@@ -1984,7 +2053,6 @@ Add some from the Friends section.
 return;
 
 }
-
 
 box.innerHTML =
 friends
@@ -2090,9 +2158,7 @@ return;
 
 }
 
-
 let selectedFriends = [];
-
 
 document
 .querySelectorAll(
@@ -2115,7 +2181,6 @@ friend.name
 
 });
 
-
 const otherFriends =
 document
 .getElementById("otherFriends")
@@ -2130,12 +2195,10 @@ otherFriends
 
 }
 
-
 const photo =
 document
 .getElementById("photoPreview")
 .src;
-
 
 const {
 error
@@ -2209,7 +2272,6 @@ null
 
 });
 
-
 if(error){
 
 alert(
@@ -2220,7 +2282,6 @@ error.message
 return;
 
 }
-
 
 clearHikeForm();
 
@@ -2316,7 +2377,6 @@ document
 
 });
 
-
 document
 .querySelectorAll(
 "#friendChecklist input"
@@ -2327,24 +2387,20 @@ box.checked =
 false
 );
 
-
 document
 .getElementById("photo")
 .value =
 "";
-
 
 document
 .getElementById("photoPreview")
 .src =
 "";
 
-
 document
 .getElementById("photoPreview")
 .style.display =
 "none";
-
 
 document
 .getElementById("gpsStatus")
@@ -2410,7 +2466,6 @@ return;
 
 }
 
-
 box.innerHTML =
 friends
 .map(friend => `
@@ -2420,7 +2475,6 @@ friends
 <div class="friend-name">
 👤 ${esc(friend.name)}
 </div>
-
 
 ${
 friend.note
@@ -2434,7 +2488,6 @@ ${esc(friend.note)}
 ""
 }
 
-
 <div class="friend-actions">
 
 <button
@@ -2442,7 +2495,6 @@ onclick="editFriend('${friend.id}')"
 >
 ✏️ Edit
 </button>
-
 
 <button
 class="delete"
@@ -2571,9 +2623,7 @@ return;
 
 }
 
-
 let result;
-
 
 if(editingFriendId){
 
@@ -2605,7 +2655,6 @@ note:note
 
 }
 
-
 if(result.error){
 
 alert(
@@ -2616,7 +2665,6 @@ result.error.message
 return;
 
 }
-
 
 closeFriendForm();
 
@@ -2652,7 +2700,6 @@ return;
 
 }
 
-
 const {
 error
 } =
@@ -2674,7 +2721,6 @@ error.message
 return;
 
 }
-
 
 await loadData();
 
@@ -2707,7 +2753,6 @@ sum +
 (Number(h.elevation) || 0),
 0
 );
-
 
 alert(
 
@@ -2744,7 +2789,6 @@ h => h.gear
 h => "• " + h.gear
 )
 .join("\n");
-
 
 alert(
 
