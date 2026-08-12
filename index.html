@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -52,6 +53,22 @@ header p{
   font-size:15px;
 }
 
+.userbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:15px;
+  font-size:13px;
+}
+
+.logout{
+  border:1px solid #ffffff66;
+  background:#ffffff18;
+  color:white;
+  padding:7px 11px;
+  border-radius:8px;
+}
+
 main{
   max-width:720px;
   margin:auto;
@@ -91,6 +108,7 @@ main{
   text-align:left;
   font-size:16px;
   color:var(--ink);
+  cursor:pointer;
 }
 
 .menu .icon{
@@ -193,6 +211,7 @@ main{
   background:white;
   border-radius:9px;
   padding:8px 12px;
+  cursor:pointer;
 }
 
 .friend-actions .delete{
@@ -288,6 +307,7 @@ textarea{
   border-radius:10px;
   border:1px solid var(--line);
   font-size:16px;
+  cursor:pointer;
 }
 
 .primary{
@@ -303,6 +323,35 @@ textarea{
   display:none;
 }
 
+.map-button{
+  display:block;
+  margin-top:12px;
+  width:100%;
+  padding:11px;
+  border:0;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  text-align:center;
+  text-decoration:none;
+}
+
+.gps-button{
+  margin-top:8px;
+  width:100%;
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:white;
+  cursor:pointer;
+}
+
+.auth-help{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.4;
+}
+
 .fab{
   position:fixed;
   right:20px;
@@ -316,6 +365,13 @@ textarea{
   font-size:30px;
   box-shadow:0 4px 14px #0004;
   z-index:15;
+  cursor:pointer;
+}
+
+.loading{
+  text-align:center;
+  padding:35px;
+  color:var(--muted);
 }
 </style>
 </head>
@@ -324,59 +380,101 @@ textarea{
 
 <header>
 <div class="brand">
+
 <div class="logo">🥾</div>
+
 <h1>Cairn</h1>
+
 <p>Every trail has a story.</p>
+
+<div class="userbar">
+
+<span id="userDisplay"></span>
+
+<button class="logout" onclick="logout()">
+Log out
+</button>
+
+</div>
+
 </div>
 </header>
 
-<main>
 
-<div class="hero">
-<h2>Your adventures</h2>
-<p>
-Keep track of the trails, people, gear and memories
-that make your hikes worth remembering.
-</p>
+<main id="app">
+
+<div class="loading">
+Loading Cairn...
 </div>
-
-<div class="grid">
-
-<button class="menu" onclick="openHikeModal()">
-<span class="icon">🥾</span>
-<strong>Log a Hike</strong>
-<span>Record a new adventure</span>
-</button>
-
-<button class="menu" onclick="showFriends()">
-<span class="icon">👥</span>
-<strong>Friends</strong>
-<span>Your hiking crew</span>
-</button>
-
-<button class="menu" onclick="showStats()">
-<span class="icon">📊</span>
-<strong>My Stats</strong>
-<span>Your hiking history</span>
-</button>
-
-<button class="menu" onclick="showGear()">
-<span class="icon">🎒</span>
-<strong>Gear</strong>
-<span>What works on the trail</span>
-</button>
-
-</div>
-
-<div class="section-title">
-<h2>Recent hikes</h2>
-</div>
-
-<div id="hikes"></div>
 
 </main>
 
-<button class="fab" onclick="openHikeModal()">+</button>
+
+<button
+class="fab"
+onclick="openHikeModal()"
+style="display:none"
+>
++
+</button>
+
+
+<!-- LOGIN -->
+
+<div class="modal open" id="loginModal">
+
+<div class="sheet">
+
+<h2>🥾 Welcome to Cairn</h2>
+
+<p>
+Your Cairn account keeps your hikes and friends
+available on both your phone and desktop.
+</p>
+
+<label>Email</label>
+
+<input
+id="email"
+type="email"
+autocomplete="email"
+placeholder="Your email"
+>
+
+<label>Password</label>
+
+<input
+id="password"
+type="password"
+autocomplete="current-password"
+placeholder="At least 6 characters"
+>
+
+<div class="actions">
+
+<button
+class="primary"
+onclick="signIn()"
+>
+Log In
+</button>
+
+<button
+onclick="signUp()"
+>
+Create Account
+</button>
+
+</div>
+
+<p
+id="authMessage"
+class="auth-help"
+></p>
+
+</div>
+
+</div>
 
 
 <!-- HIKE WINDOW -->
@@ -388,24 +486,53 @@ that make your hikes worth remembering.
 <h2>🥾 Log a Hike</h2>
 
 <label>Trail name</label>
-<input id="trail" type="text" placeholder="e.g. Cox Heath Mountain">
+
+<input
+id="trail"
+type="text"
+placeholder="e.g. Cox Heath Mountain"
+>
 
 <label>Location</label>
-<input id="location" type="text" placeholder="e.g. Cape Breton Highlands">
+
+<input
+id="location"
+type="text"
+placeholder="e.g. Cape Breton Highlands"
+>
 
 <label>Date</label>
-<input id="date" type="date">
+
+<input
+id="date"
+type="date"
+>
 
 <label>Distance (km)</label>
-<input id="distance" type="number" step="0.1">
+
+<input
+id="distance"
+type="number"
+step="0.1"
+>
 
 <label>Elevation gain (m)</label>
-<input id="elevation" type="number">
+
+<input
+id="elevation"
+type="number"
+>
 
 <label>Pack weight (lb)</label>
-<input id="pack" type="number" step="0.1">
+
+<input
+id="pack"
+type="number"
+step="0.1"
+>
 
 <label>Difficulty</label>
+
 <select id="difficulty">
 <option>Easy</option>
 <option>Moderate</option>
@@ -415,28 +542,101 @@ that make your hikes worth remembering.
 </select>
 
 <label>Who came?</label>
-<div id="friendChecklist" class="check-list"></div>
+
+<div
+id="friendChecklist"
+class="check-list"
+></div>
 
 <label>Other people</label>
-<input id="otherFriends" type="text" placeholder="Anyone not in your Friends list">
+
+<input
+id="otherFriends"
+type="text"
+placeholder="Anyone not in your Friends list"
+>
 
 <label>Weather</label>
-<input id="weather" type="text" placeholder="e.g. Sunny, 18°C">
+
+<input
+id="weather"
+type="text"
+placeholder="e.g. Sunny, 18°C"
+>
 
 <label>Gear notes</label>
-<textarea id="gear" placeholder="What worked? What didn't?"></textarea>
+
+<textarea
+id="gear"
+placeholder="What worked? What didn't?"
+></textarea>
 
 <label>Trail notes</label>
-<textarea id="notes" placeholder="What do you want to remember?"></textarea>
+
+<textarea
+id="notes"
+placeholder="What do you want to remember?"
+></textarea>
+
+
+<label>📍 Trailhead location</label>
+
+<input
+id="latitude"
+type="number"
+step="any"
+placeholder="Latitude"
+>
+
+<input
+id="longitude"
+type="number"
+step="any"
+placeholder="Longitude"
+style="margin-top:8px"
+>
+
+<button
+class="gps-button"
+onclick="getGPS()"
+>
+📍 Get My Current Location
+</button>
+
+<p
+id="gpsStatus"
+class="auth-help"
+></p>
+
 
 <label>Photo</label>
-<input id="photo" type="file" accept="image/*" onchange="previewPhoto(event)">
 
-<img id="photoPreview" class="photo-preview">
+<input
+id="photo"
+type="file"
+accept="image/*"
+onchange="previewPhoto(event)"
+>
+
+<img
+id="photoPreview"
+class="photo-preview"
+>
+
 
 <div class="actions">
-<button onclick="closeHikeModal()">Cancel</button>
-<button class="primary" onclick="saveHike()">Save Hike</button>
+
+<button onclick="closeHikeModal()">
+Cancel
+</button>
+
+<button
+class="primary"
+onclick="saveHike()"
+>
+Save Hike
+</button>
+
 </div>
 
 </div>
@@ -454,8 +654,18 @@ that make your hikes worth remembering.
 <div id="friendsList"></div>
 
 <div class="actions">
-<button onclick="closeFriends()">Done</button>
-<button class="primary" onclick="openFriendForm()">+ Add Friend</button>
+
+<button onclick="closeFriends()">
+Done
+</button>
+
+<button
+class="primary"
+onclick="openFriendForm()"
+>
++ Add Friend
+</button>
+
 </div>
 
 </div>
@@ -468,96 +678,531 @@ that make your hikes worth remembering.
 
 <div class="sheet">
 
-<h2 id="friendFormTitle">Add Friend</h2>
+<h2 id="friendFormTitle">
+Add Friend
+</h2>
 
-<label for="friendName">Name</label>
-<input id="friendName" type="text" placeholder="e.g. Wendy">
+<label for="friendName">
+Name
+</label>
 
-<label for="friendNote">Optional note</label>
-<textarea id="friendNote" placeholder="Favourite trail, hiking style, etc."></textarea>
+<input
+id="friendName"
+type="text"
+placeholder="e.g. Wendy"
+>
+
+<label for="friendNote">
+Optional note
+</label>
+
+<textarea
+id="friendNote"
+placeholder="Favourite trail, hiking style, etc."
+></textarea>
 
 <div class="actions">
-<button onclick="closeFriendForm()">Cancel</button>
-<button class="primary" onclick="saveFriend()">Save Friend</button>
+
+<button onclick="closeFriendForm()">
+Cancel
+</button>
+
+<button
+class="primary"
+onclick="saveFriend()"
+>
+Save Friend
+</button>
+
 </div>
 
 </div>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
-/* ---------------------------------
+/* =====================================================
+   CAIRN SUPABASE CONNECTION
+   =====================================================
+
+   REPLACE ONLY THE TWO VALUES BELOW.
+
+   Do NOT put your database password here.
+   Do NOT put a service_role or secret key here.
+   ===================================================== */
+
+const SUPABASE_URL =
+"https://fdxzoqhbvifuyjyzjefe.supabase.co/rest/v1/";
+
+const SUPABASE_KEY =
+"sb_publishable__ad1TkvwWaMbTdpFf4o0tg_7BfOpo-W";
+
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+
+/* =====================================================
    DATA
---------------------------------- */
+   ===================================================== */
 
-let hikes =
-JSON.parse(
-localStorage.getItem("cairnHikes") || "[]"
+let hikes = [];
+let friends = [];
+
+let editingFriendId = null;
+
+
+/* =====================================================
+   START
+   ===================================================== */
+
+window.addEventListener(
+"DOMContentLoaded",
+start
 );
 
-let friends =
-JSON.parse(
-localStorage.getItem("cairnFriends") || "[]"
+
+async function start(){
+
+const {
+data:{
+session
+}
+} =
+await db.auth.getSession();
+
+
+if(session){
+
+showApp();
+
+await loadData();
+
+}else{
+
+document
+.getElementById("loginModal")
+.classList.add("open");
+
+}
+
+}
+
+
+/* =====================================================
+   AUTH
+   ===================================================== */
+
+async function signUp(){
+
+const email =
+document
+.getElementById("email")
+.value
+.trim();
+
+const password =
+document
+.getElementById("password")
+.value;
+
+
+if(!email || !password){
+
+showAuthMessage(
+"Please enter your email and password."
 );
 
-let editingFriendIndex = null;
+return;
+
+}
 
 
-/* ---------------------------------
-   STORAGE
---------------------------------- */
+if(password.length < 6){
 
-function saveHikes(){
+showAuthMessage(
+"Your password must be at least 6 characters."
+);
 
-localStorage.setItem(
-"cairnHikes",
-JSON.stringify(hikes)
+return;
+
+}
+
+
+showAuthMessage(
+"Creating your Cairn account..."
+);
+
+
+const {
+data,
+error
+} =
+await db.auth.signUp({
+
+email:email,
+
+password:password
+
+});
+
+
+if(error){
+
+showAuthMessage(
+error.message
+);
+
+return;
+
+}
+
+
+if(data.session){
+
+showApp();
+
+await loadData();
+
+}else{
+
+showAuthMessage(
+"Account created. Check your email to confirm your account, then log in."
 );
 
 }
 
-function saveFriends(){
+}
 
-localStorage.setItem(
-"cairnFriends",
-JSON.stringify(friends)
+
+async function signIn(){
+
+const email =
+document
+.getElementById("email")
+.value
+.trim();
+
+const password =
+document
+.getElementById("password")
+.value;
+
+
+if(!email || !password){
+
+showAuthMessage(
+"Please enter your email and password."
 );
+
+return;
 
 }
 
 
-/* ---------------------------------
-   HOME / HIKES
---------------------------------- */
+showAuthMessage(
+"Signing in..."
+);
+
+
+const {
+error
+} =
+await db.auth.signInWithPassword({
+
+email:email,
+
+password:password
+
+});
+
+
+if(error){
+
+showAuthMessage(
+error.message
+);
+
+return;
+
+}
+
+
+document
+.getElementById("loginModal")
+.classList.remove("open");
+
+showApp();
+
+await loadData();
+
+}
+
+
+async function logout(){
+
+await db.auth.signOut();
+
+location.reload();
+
+}
+
+
+function showAuthMessage(message){
+
+document
+.getElementById("authMessage")
+.textContent =
+message;
+
+}
+
+
+/* =====================================================
+   APP
+   ===================================================== */
+
+function showApp(){
+
+document
+.getElementById("loginModal")
+.classList.remove("open");
+
+document
+.querySelector(".fab")
+.style.display =
+"block";
+
+
+document
+.getElementById("app")
+.innerHTML = `
+
+<div class="hero">
+
+<h2>Your adventures</h2>
+
+<p>
+Keep track of the trails, people, gear and memories
+that make your hikes worth remembering.
+</p>
+
+</div>
+
+
+<div class="grid">
+
+<button
+class="menu"
+onclick="openHikeModal()"
+>
+
+<span class="icon">🥾</span>
+
+<strong>Log a Hike</strong>
+
+<span>Record a new adventure</span>
+
+</button>
+
+
+<button
+class="menu"
+onclick="showFriends()"
+>
+
+<span class="icon">👥</span>
+
+<strong>Friends</strong>
+
+<span>Your hiking crew</span>
+
+</button>
+
+
+<button
+class="menu"
+onclick="showStats()"
+>
+
+<span class="icon">📊</span>
+
+<strong>My Stats</strong>
+
+<span>Your hiking history</span>
+
+</button>
+
+
+<button
+class="menu"
+onclick="showGear()"
+>
+
+<span class="icon">🎒</span>
+
+<strong>Gear</strong>
+
+<span>What works on the trail</span>
+
+</button>
+
+</div>
+
+
+<div class="section-title">
+<h2>Recent hikes</h2>
+</div>
+
+<div id="hikes"></div>
+
+`;
+
+}
+
+
+/* =====================================================
+   CLOUD DATA
+   ===================================================== */
+
+async function loadData(){
+
+const {
+data:{
+user
+}
+} =
+await db.auth.getUser();
+
+
+if(!user){
+
+return;
+
+}
+
+
+document
+.getElementById("userDisplay")
+.textContent =
+user.email;
+
+
+const hikesResult =
+await db
+.from("hikes")
+.select("*")
+.order(
+"hike_date",
+{
+ascending:false
+}
+);
+
+
+if(hikesResult.error){
+
+alert(
+"Couldn't load hikes:\n\n" +
+hikesResult.error.message
+);
+
+return;
+
+}
+
+
+hikes =
+hikesResult.data || [];
+
+
+const friendsResult =
+await db
+.from("friends")
+.select("*")
+.order(
+"name",
+{
+ascending:true
+}
+);
+
+
+if(friendsResult.error){
+
+alert(
+"Couldn't load friends:\n\n" +
+friendsResult.error.message
+);
+
+return;
+
+}
+
+
+friends =
+friendsResult.data || [];
+
+
+render();
+
+}
+
+
+/* =====================================================
+   RENDER HIKES
+   ===================================================== */
 
 function render(){
 
 const box =
 document.getElementById("hikes");
 
+
+if(!box){
+
+return;
+
+}
+
+
 if(!hikes.length){
 
 box.innerHTML = `
+
 <div class="empty">
-<div style="font-size:42px">🥾</div>
-<p><strong>No hikes yet.</strong></p>
-<p>Your first adventure belongs here.</p>
+
+<div style="font-size:42px">
+🥾
 </div>
+
+<p>
+<strong>No hikes yet.</strong>
+</p>
+
+<p>
+Your first adventure belongs here.
+</p>
+
+</div>
+
 `;
 
 return;
+
 }
 
-const sorted =
-[...hikes].sort(
-(a,b) =>
-new Date(b.date || 0) -
-new Date(a.date || 0)
-);
 
 box.innerHTML =
-sorted.slice(0,10).map(h => `
+hikes
+.slice(0,10)
+.map(h => `
 
 <div class="hike-card">
 
@@ -573,66 +1218,130 @@ ${esc(h.trail)}
 ${esc(h.difficulty || "Difficulty not entered")}
 </div>
 
+
 <div class="stats">
 
 <div class="stat">
-<strong>${esc(h.distance || "—")}</strong>
+<strong>
+${esc(h.distance || "—")}
+</strong>
 <span>KM</span>
 </div>
 
 <div class="stat">
-<strong>${esc(h.elevation || "—")}</strong>
+<strong>
+${esc(h.elevation || "—")}
+</strong>
 <span>METRES</span>
 </div>
 
 <div class="stat">
-<strong>${esc(h.pack || "—")}</strong>
+<strong>
+${esc(h.pack || "—")}
+</strong>
 <span>LB PACK</span>
 </div>
 
 </div>
 
-${h.friends ? `
-<div class="note">
-👥 <b>With:</b> ${esc(h.friends)}
-</div>
-` : ""}
 
-${h.weather ? `
+${
+h.friends
+?
+`
+<div class="note">
+👥 <b>With:</b>
+${esc(h.friends)}
+</div>
+`
+:
+""
+}
+
+
+${
+h.weather
+?
+`
 <div class="note">
 🌦️ ${esc(h.weather)}
 </div>
-` : ""}
+`
+:
+""
+}
 
-${h.notes ? `
+
+${
+h.notes
+?
+`
 <div class="note">
 📝 ${esc(h.notes)}
 </div>
-` : ""}
+`
+:
+""
+}
 
-${h.gear ? `
+
+${
+h.gear
+?
+`
 <div class="note">
-🎒 <b>Gear:</b> ${esc(h.gear)}
+🎒 <b>Gear:</b>
+${esc(h.gear)}
 </div>
-` : ""}
+`
+:
+""
+}
 
-${h.photo ? `
+
+${
+h.photo
+?
+`
 <img
 src="${h.photo}"
 style="width:100%;margin-top:12px;border-radius:12px"
 >
-` : ""}
+`
+:
+""
+}
+
+
+${
+h.latitude &&
+h.longitude
+?
+`
+<a
+class="map-button"
+href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.latitude + "," + h.longitude)}"
+target="_blank"
+>
+🗺️ Open Trailhead in Google Maps
+</a>
+`
+:
+""
+}
+
 
 </div>
 
-`).join("");
+`)
+.join("");
 
 }
 
 
-/* ---------------------------------
+/* =====================================================
    HIKE MODAL
---------------------------------- */
+   ===================================================== */
 
 function openHikeModal(){
 
@@ -640,16 +1349,25 @@ document
 .getElementById("hikeModal")
 .classList.add("open");
 
+
 document
 .getElementById("date")
 .value =
-new Date().toISOString().split("T")[0];
+new Date()
+.toISOString()
+.split("T")[0];
+
 
 renderFriendChecklist();
 
-setTimeout(() => {
-document.getElementById("trail").focus();
-},100);
+
+setTimeout(
+() =>
+document
+.getElementById("trail")
+.focus(),
+100
+);
 
 }
 
@@ -663,34 +1381,44 @@ document
 }
 
 
-/* ---------------------------------
+/* =====================================================
    FRIEND CHECKBOXES
---------------------------------- */
+   ===================================================== */
 
 function renderFriendChecklist(){
 
 const box =
-document.getElementById("friendChecklist");
+document
+.getElementById("friendChecklist");
+
 
 if(!friends.length){
 
 box.innerHTML = `
+
 <div style="color:#69746d">
-No friends added yet. Add some from the Friends section.
+
+No friends added yet.
+Add some from the Friends section.
+
 </div>
+
 `;
 
 return;
+
 }
 
+
 box.innerHTML =
-friends.map((friend,index) => `
+friends
+.map(friend => `
 
 <label class="check-item">
 
 <input
 type="checkbox"
-value="${index}"
+value="${friend.id}"
 >
 
 <span>
@@ -699,39 +1427,120 @@ ${esc(friend.name)}
 
 </label>
 
-`).join("");
+`)
+.join("");
 
 }
 
 
-/* ---------------------------------
-   SAVE HIKE
---------------------------------- */
+/* =====================================================
+   GPS
+   ===================================================== */
 
-function saveHike(){
+function getGPS(){
+
+const status =
+document
+.getElementById("gpsStatus");
+
+
+if(!navigator.geolocation){
+
+status.textContent =
+"GPS isn't available in this browser.";
+
+return;
+
+}
+
+
+status.textContent =
+"Getting your location...";
+
+
+navigator.geolocation.getCurrentPosition(
+
+position => {
+
+document
+.getElementById("latitude")
+.value =
+position.coords.latitude.toFixed(6);
+
+
+document
+.getElementById("longitude")
+.value =
+position.coords.longitude.toFixed(6);
+
+
+status.textContent =
+"📍 Location captured!";
+
+},
+
+error => {
+
+status.textContent =
+"Couldn't get your location. Check your browser's location permission.";
+
+},
+
+{
+enableHighAccuracy:true,
+timeout:10000,
+maximumAge:0
+}
+
+);
+
+}
+
+
+/* =====================================================
+   SAVE HIKE
+   ===================================================== */
+
+async function saveHike(){
 
 const trail =
-document.getElementById("trail")
-.value.trim();
+document
+.getElementById("trail")
+.value
+.trim();
+
 
 if(!trail){
 
-alert("Please enter a trail name.");
+alert(
+"Please enter a trail name."
+);
 
 return;
+
 }
+
 
 let selectedFriends = [];
 
+
 document
-.querySelectorAll("#friendChecklist input:checked")
+.querySelectorAll(
+"#friendChecklist input:checked"
+)
 .forEach(box => {
 
 const friend =
-friends[Number(box.value)];
+friends.find(
+f => f.id === box.value
+);
 
 if(friend){
-selectedFriends.push(friend.name);
+
+selectedFriends.push(
+friend.name
+);
+
 }
 
 });
@@ -740,45 +1549,54 @@ selectedFriends.push(friend.name);
 const otherFriends =
 document
 .getElementById("otherFriends")
-.value.trim();
+.value
+.trim();
+
 
 if(otherFriends){
-selectedFriends.push(otherFriends);
+
+selectedFriends.push(
+otherFriends
+);
+
 }
 
 
-const preview =
-document.getElementById("photoPreview");
+const photo =
+document
+.getElementById("photoPreview")
+.src;
 
 
-const hike = {
+const {
+error
+} =
+await db
+.from("hikes")
+.insert({
 
 trail:trail,
 
 location:
 document
 .getElementById("location")
-.value.trim(),
+.value
+.trim(),
 
-date:
+hike_date:
 document
 .getElementById("date")
-.value,
+.value ||
+null,
 
 distance:
-document
-.getElementById("distance")
-.value,
+numberOrNull("distance"),
 
 elevation:
-document
-.getElementById("elevation")
-.value,
+numberOrNull("elevation"),
 
 pack:
-document
-.getElementById("pack")
-.value,
+numberOrNull("pack"),
 
 difficulty:
 document
@@ -791,80 +1609,127 @@ selectedFriends.join(", "),
 weather:
 document
 .getElementById("weather")
-.value.trim(),
+.value
+.trim(),
 
 gear:
 document
 .getElementById("gear")
-.value.trim(),
+.value
+.trim(),
 
 notes:
 document
 .getElementById("notes")
-.value.trim(),
+.value
+.trim(),
+
+latitude:
+numberOrNull("latitude"),
+
+longitude:
+numberOrNull("longitude"),
 
 photo:
-preview.src &&
-preview.src.startsWith("data:")
+photo &&
+photo.startsWith("data:")
 ?
-preview.src
+photo
 :
-""
+null
 
-};
+});
 
 
-hikes.push(hike);
+if(error){
 
-saveHikes();
+alert(
+"Couldn't save hike:\n\n" +
+error.message
+);
 
-render();
+return;
+
+}
+
 
 clearHikeForm();
 
 closeHikeModal();
 
+await loadData();
+
 }
 
 
-/* ---------------------------------
+function numberOrNull(id){
+
+const value =
+document
+.getElementById(id)
+.value
+.trim();
+
+
+if(value === ""){
+
+return null;
+
+}
+
+
+return Number(value);
+
+}
+
+
+/* =====================================================
    PHOTO
---------------------------------- */
+   ===================================================== */
 
 function previewPhoto(event){
 
 const file =
 event.target.files[0];
 
+
 if(!file){
+
 return;
+
 }
+
 
 const reader =
 new FileReader();
+
 
 reader.onload =
 function(e){
 
 const img =
-document.getElementById("photoPreview");
+document
+.getElementById("photoPreview");
+
 
 img.src =
 e.target.result;
+
 
 img.style.display =
 "block";
 
 };
 
+
 reader.readAsDataURL(file);
 
 }
 
 
-/* ---------------------------------
-   CLEAR HIKE FORM
---------------------------------- */
+/* =====================================================
+   CLEAR HIKE
+   ===================================================== */
 
 function clearHikeForm(){
 
@@ -877,35 +1742,60 @@ function clearHikeForm(){
 "otherFriends",
 "weather",
 "gear",
-"notes"
+"notes",
+"latitude",
+"longitude"
 ]
 .forEach(id => {
 
 document
 .getElementById(id)
-.value = "";
+.value =
+"";
 
 });
 
 
 document
+.querySelectorAll(
+"#friendChecklist input"
+)
+.forEach(
+box =>
+box.checked =
+false
+);
+
+
+document
 .getElementById("photo")
-.value = "";
+.value =
+"";
+
 
 document
 .getElementById("photoPreview")
-.src = "";
+.src =
+"";
+
 
 document
 .getElementById("photoPreview")
-.style.display = "none";
+.style.display =
+"none";
+
+
+document
+.getElementById("gpsStatus")
+.textContent =
+"";
 
 }
 
 
-/* ---------------------------------
+/* =====================================================
    FRIENDS
---------------------------------- */
+   ===================================================== */
 
 function showFriends(){
 
@@ -930,7 +1820,9 @@ document
 function renderFriends(){
 
 const box =
-document.getElementById("friendsList");
+document
+.getElementById("friendsList");
+
 
 if(!friends.length){
 
@@ -938,22 +1830,30 @@ box.innerHTML = `
 
 <div class="empty">
 
-<div style="font-size:40px">👥</div>
+<div style="font-size:40px">
+👥
+</div>
 
-<p><strong>No friends yet.</strong></p>
+<p>
+<strong>No friends yet.</strong>
+</p>
 
-<p>Add your hiking crew!</p>
+<p>
+Add your hiking crew!
+</p>
 
 </div>
 
 `;
 
 return;
+
 }
 
 
 box.innerHTML =
-friends.map((friend,index) => `
+friends
+.map(friend => `
 
 <div class="friend-card">
 
@@ -961,23 +1861,32 @@ friends.map((friend,index) => `
 👤 ${esc(friend.name)}
 </div>
 
-${friend.note ? `
+
+${
+friend.note
+?
+`
 <div class="note">
 ${esc(friend.note)}
 </div>
-` : ""}
+`
+:
+""
+}
+
 
 <div class="friend-actions">
 
 <button
-onclick="editFriend(${index})"
+onclick="editFriend('${friend.id}')"
 >
 ✏️ Edit
 </button>
 
+
 <button
 class="delete"
-onclick="deleteFriend(${index})"
+onclick="deleteFriend('${friend.id}')"
 >
 🗑 Delete
 </button>
@@ -986,91 +1895,99 @@ onclick="deleteFriend(${index})"
 
 </div>
 
-`).join("");
+`)
+.join("");
 
 }
 
 
-/* ---------------------------------
-   ADD FRIEND
---------------------------------- */
+/* =====================================================
+   FRIEND FORM
+   ===================================================== */
 
 function openFriendForm(){
 
-editingFriendIndex = null;
+editingFriendId =
+null;
+
 
 document
 .getElementById("friendFormTitle")
 .textContent =
 "Add Friend";
 
+
 document
 .getElementById("friendName")
-.value = "";
+.value =
+"";
+
 
 document
 .getElementById("friendNote")
-.value = "";
+.value =
+"";
+
 
 document
 .getElementById("friendFormModal")
 .classList.add("open");
 
-setTimeout(() => {
 
+setTimeout(
+() =>
 document
 .getElementById("friendName")
-.focus();
-
-},100);
+.focus(),
+100
+);
 
 }
 
 
-/* ---------------------------------
-   EDIT FRIEND
---------------------------------- */
-
-function editFriend(index){
-
-editingFriendIndex = index;
+function editFriend(id){
 
 const friend =
-friends[index];
+friends.find(
+f => f.id === id
+);
+
+
+if(!friend){
+
+return;
+
+}
+
+
+editingFriendId =
+id;
+
 
 document
 .getElementById("friendFormTitle")
 .textContent =
 "Edit Friend";
 
+
 document
 .getElementById("friendName")
 .value =
 friend.name;
+
 
 document
 .getElementById("friendNote")
 .value =
 friend.note || "";
 
+
 document
 .getElementById("friendFormModal")
 .classList.add("open");
 
-setTimeout(() => {
-
-document
-.getElementById("friendName")
-.focus();
-
-},100);
-
 }
 
-
-/* ---------------------------------
-   CLOSE FRIEND FORM
---------------------------------- */
 
 function closeFriendForm(){
 
@@ -1081,113 +1998,174 @@ document
 }
 
 
-/* ---------------------------------
-   SAVE FRIEND
---------------------------------- */
-
-function saveFriend(){
+async function saveFriend(){
 
 const name =
 document
 .getElementById("friendName")
-.value.trim();
+.value
+.trim();
+
 
 const note =
 document
 .getElementById("friendNote")
-.value.trim();
+.value
+.trim();
 
 
 if(!name){
 
-alert("Please enter your friend's name.");
-
-document
-.getElementById("friendName")
-.focus();
+alert(
+"Please enter your friend's name."
+);
 
 return;
+
 }
 
 
-if(editingFriendIndex === null){
+let result;
 
-friends.push({
+
+if(editingFriendId){
+
+result =
+await db
+.from("friends")
+.update({
+
+name:name,
+note:note
+
+})
+.eq(
+"id",
+editingFriendId
+);
+
+}else{
+
+result =
+await db
+.from("friends")
+.insert({
 
 name:name,
 note:note
 
 });
 
-}else{
-
-friends[editingFriendIndex] = {
-
-name:name,
-note:note
-
-};
-
 }
 
 
-saveFriends();
+if(result.error){
 
-renderFriends();
-
-closeFriendForm();
-
-}
-
-
-/* ---------------------------------
-   DELETE FRIEND
---------------------------------- */
-
-function deleteFriend(index){
-
-const name =
-friends[index].name;
-
-if(!confirm(
-"Remove " + name + " from your Friends list?"
-)){
+alert(
+"Couldn't save friend:\n\n" +
+result.error.message
+);
 
 return;
 
 }
 
-friends.splice(index,1);
 
-saveFriends();
+closeFriendForm();
+
+await loadData();
 
 renderFriends();
 
 }
 
 
-/* ---------------------------------
+async function deleteFriend(id){
+
+const friend =
+friends.find(
+f => f.id === id
+);
+
+
+if(!friend){
+
+return;
+
+}
+
+
+if(
+!confirm(
+"Remove " +
+friend.name +
+" from your Friends list?"
+)
+){
+
+return;
+
+}
+
+
+const {
+error
+} =
+await db
+.from("friends")
+.delete()
+.eq(
+"id",
+id
+);
+
+
+if(error){
+
+alert(
+"Couldn't delete friend:\n\n" +
+error.message
+);
+
+return;
+
+}
+
+
+await loadData();
+
+renderFriends();
+
+}
+
+
+/* =====================================================
    STATS
---------------------------------- */
+   ===================================================== */
 
 function showStats(){
 
 const count =
 hikes.length;
 
+
 const distance =
 hikes.reduce(
 (sum,h) =>
-sum + (Number(h.distance) || 0),
+sum +
+(Number(h.distance) || 0),
 0
 );
+
 
 const elevation =
 hikes.reduce(
 (sum,h) =>
-sum + (Number(h.elevation) || 0),
+sum +
+(Number(h.elevation) || 0),
 0
 );
+
 
 alert(
 
@@ -1195,13 +2173,12 @@ alert(
 
 "Hikes: " +
 count +
-"\n\n" +
 
-"Distance: " +
+"\n\nDistance: " +
 distance.toFixed(1) +
-" km\n\n" +
+" km" +
 
-"Elevation: " +
+"\n\nElevation: " +
 Math.round(elevation) +
 " m"
 
@@ -1210,17 +2187,22 @@ Math.round(elevation) +
 }
 
 
-/* ---------------------------------
+/* =====================================================
    GEAR
---------------------------------- */
+   ===================================================== */
 
 function showGear(){
 
 const notes =
 hikes
-.filter(h => h.gear)
-.map(h => "• " + h.gear)
+.filter(
+h => h.gear
+)
+.map(
+h => "• " + h.gear
+)
 .join("\n");
+
 
 alert(
 
@@ -1228,24 +2210,27 @@ notes
 
 ?
 
-"GEAR NOTES\n\n" + notes
+"GEAR NOTES\n\n" +
+notes
 
 :
 
-"No gear notes yet.\n\nAdd gear notes when you log a hike."
+"No gear notes yet.\n\n" +
+"Add gear notes when you log a hike."
 
 );
 
 }
 
 
-/* ---------------------------------
-   SECURITY
---------------------------------- */
+/* =====================================================
+   SECURITY / DISPLAY
+   ===================================================== */
 
 function esc(value){
 
-return String(value).replace(
+return String(value)
+.replace(
 /[&<>"']/g,
 
 char => ({
@@ -1262,14 +2247,8 @@ char => ({
 
 }
 
-
-/* ---------------------------------
-   START
---------------------------------- */
-
-render();
-
 </script>
 
 </body>
 </html>
+```
