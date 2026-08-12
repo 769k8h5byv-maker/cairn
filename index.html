@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -334,23 +335,6 @@ textarea{
   color:white;
   text-align:center;
   text-decoration:none;
-  cursor:pointer;
-  font-size:15px;
-}
-
-.share-button{
-  display:block;
-  margin-top:10px;
-  width:100%;
-  padding:11px;
-  border:1px solid var(--accent);
-  border-radius:10px;
-  background:#e6eee8;
-  color:var(--accent);
-  text-align:center;
-  cursor:pointer;
-  font-size:15px;
-  font-weight:650;
 }
 
 .gps-button{
@@ -390,13 +374,81 @@ textarea{
   padding:35px;
   color:var(--muted);
 }
+
+/* SHARE */
+
+.share-button{
+  width:100%;
+  margin-top:14px;
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  font-size:16px;
+  font-weight:650;
+  cursor:pointer;
+}
+
+.share-options{
+  display:grid;
+  gap:10px;
+  margin-top:15px;
+}
+
+.share-option{
+  width:100%;
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:white;
+  text-align:left;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.share-option.facebook{
+  background:#1877f2;
+  color:white;
+  border-color:#1877f2;
+}
+
+.share-option.copy{
+  background:#e6eee8;
+  color:var(--accent);
+}
+
+.share-preview{
+  background:var(--bg);
+  border-radius:13px;
+  padding:14px;
+  margin-top:12px;
+  line-height:1.45;
+  white-space:pre-wrap;
+  font-size:14px;
+}
+
+.share-photo{
+  width:100%;
+  max-height:230px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-top:12px;
+}
+
+.success-message{
+  color:var(--accent);
+  font-weight:650;
+  text-align:center;
+  margin-top:12px;
+  min-height:20px;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-
 <div class="brand">
 
 <div class="logo">🥾</div>
@@ -416,7 +468,6 @@ Log out
 </div>
 
 </div>
-
 </header>
 
 
@@ -597,7 +648,6 @@ id="notes"
 placeholder="What do you want to remember?"
 ></textarea>
 
-
 <label>📍 Trailhead location</label>
 
 <input
@@ -627,7 +677,6 @@ id="gpsStatus"
 class="auth-help"
 ></p>
 
-
 <label>Photo</label>
 
 <input
@@ -641,7 +690,6 @@ onchange="previewPhoto(event)"
 id="photoPreview"
 class="photo-preview"
 >
-
 
 <div class="actions">
 
@@ -659,7 +707,6 @@ Save Hike
 </div>
 
 </div>
-
 </div>
 
 
@@ -689,7 +736,6 @@ onclick="openFriendForm()"
 </div>
 
 </div>
-
 </div>
 
 
@@ -738,12 +784,63 @@ Save Friend
 </div>
 
 </div>
+</div>
+
+
+<!-- SHARE HIKE WINDOW -->
+
+<div class="modal" id="shareModal">
+
+<div class="sheet">
+
+<h2>🥾 Share Your Adventure</h2>
+
+<div id="sharePreview"></div>
+
+<div class="share-options">
+
+<button
+class="share-option"
+onclick="nativeShare()"
+>
+📱 Share with friends
+</button>
+
+<button
+class="share-option facebook"
+onclick="shareFacebook()"
+>
+📘 Share on Facebook
+</button>
+
+<button
+class="share-option copy"
+onclick="copyShareText()"
+>
+📋 Copy post for a Facebook group
+</button>
+
+</div>
+
+<div
+id="shareMessage"
+class="success-message"
+></div>
+
+<div class="actions">
+
+<button onclick="closeShareModal()">
+Done
+</button>
+
+</div>
+
+</div>
 
 </div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 
 <script>
 
@@ -757,7 +854,6 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable__ad1TkvwWaMbTdpFf4o0tg_7BfOpo-W";
 
-
 const db =
 supabase.createClient(
 SUPABASE_URL,
@@ -770,10 +866,9 @@ SUPABASE_KEY
    ===================================================== */
 
 let hikes = [];
-
 let friends = [];
-
 let editingFriendId = null;
+let hikeBeingShared = null;
 
 
 /* =====================================================
@@ -794,7 +889,6 @@ session
 }
 } =
 await db.auth.getSession();
-
 
 if(session){
 
@@ -830,7 +924,6 @@ document
 .getElementById("password")
 .value;
 
-
 if(!email || !password){
 
 showAuthMessage(
@@ -840,7 +933,6 @@ showAuthMessage(
 return;
 
 }
-
 
 if(password.length < 6){
 
@@ -852,11 +944,9 @@ return;
 
 }
 
-
 showAuthMessage(
 "Creating your Cairn account..."
 );
-
 
 const {
 data,
@@ -865,11 +955,9 @@ error
 await db.auth.signUp({
 
 email:email,
-
 password:password
 
 });
-
 
 if(error){
 
@@ -880,7 +968,6 @@ error.message
 return;
 
 }
-
 
 if(data.session){
 
@@ -912,7 +999,6 @@ document
 .getElementById("password")
 .value;
 
-
 if(!email || !password){
 
 showAuthMessage(
@@ -923,11 +1009,9 @@ return;
 
 }
 
-
 showAuthMessage(
 "Signing in..."
 );
-
 
 const {
 error
@@ -935,11 +1019,9 @@ error
 await db.auth.signInWithPassword({
 
 email:email,
-
 password:password
 
 });
-
 
 if(error){
 
@@ -950,7 +1032,6 @@ error.message
 return;
 
 }
-
 
 document
 .getElementById("loginModal")
@@ -992,12 +1073,10 @@ document
 .getElementById("loginModal")
 .classList.remove("open");
 
-
 document
 .querySelector(".fab")
 .style.display =
 "block";
-
 
 document
 .getElementById("app")
@@ -1076,9 +1155,7 @@ onclick="showGear()"
 
 
 <div class="section-title">
-
 <h2>Recent hikes</h2>
-
 </div>
 
 <div id="hikes"></div>
@@ -1101,13 +1178,11 @@ user
 } =
 await db.auth.getUser();
 
-
 if(!user){
 
 return;
 
 }
-
 
 document
 .getElementById("userDisplay")
@@ -1126,7 +1201,6 @@ ascending:false
 }
 );
 
-
 if(hikesResult.error){
 
 alert(
@@ -1137,7 +1211,6 @@ hikesResult.error.message
 return;
 
 }
-
 
 hikes =
 hikesResult.data || [];
@@ -1154,7 +1227,6 @@ ascending:true
 }
 );
 
-
 if(friendsResult.error){
 
 alert(
@@ -1166,10 +1238,8 @@ return;
 
 }
 
-
 friends =
 friendsResult.data || [];
-
 
 render();
 
@@ -1185,13 +1255,11 @@ function render(){
 const box =
 document.getElementById("hikes");
 
-
 if(!box){
 
 return;
 
 }
-
 
 if(!hikes.length){
 
@@ -1231,11 +1299,9 @@ hikes
 ${esc(h.trail)}
 </div>
 
-
 <div class="hike-location">
 📍 ${esc(h.location || "Location not entered")}
 </div>
-
 
 <div class="badge">
 ${esc(h.difficulty || "Difficulty not entered")}
@@ -1245,35 +1311,24 @@ ${esc(h.difficulty || "Difficulty not entered")}
 <div class="stats">
 
 <div class="stat">
-
 <strong>
 ${esc(h.distance || "—")}
 </strong>
-
 <span>KM</span>
-
 </div>
 
-
 <div class="stat">
-
 <strong>
 ${esc(h.elevation || "—")}
 </strong>
-
 <span>METRES</span>
-
 </div>
 
-
 <div class="stat">
-
 <strong>
 ${esc(h.pack || "—")}
 </strong>
-
 <span>LB PACK</span>
-
 </div>
 
 </div>
@@ -1284,10 +1339,8 @@ h.friends
 ?
 `
 <div class="note">
-
 👥 <b>With:</b>
 ${esc(h.friends)}
-
 </div>
 `
 :
@@ -1300,9 +1353,7 @@ h.weather
 ?
 `
 <div class="note">
-
 🌦️ ${esc(h.weather)}
-
 </div>
 `
 :
@@ -1315,9 +1366,7 @@ h.notes
 ?
 `
 <div class="note">
-
 📝 ${esc(h.notes)}
-
 </div>
 `
 :
@@ -1330,10 +1379,8 @@ h.gear
 ?
 `
 <div class="note">
-
 🎒 <b>Gear:</b>
 ${esc(h.gear)}
-
 </div>
 `
 :
@@ -1346,7 +1393,7 @@ h.photo
 ?
 `
 <img
-src="${esc(h.photo)}"
+src="${h.photo}"
 style="width:100%;margin-top:12px;border-radius:12px"
 >
 `
@@ -1375,7 +1422,7 @@ target="_blank"
 
 <button
 class="share-button"
-onclick="shareHike(${index})"
+onclick="openShareModal(${index})"
 >
 🥾 Share Hike
 </button>
@@ -1393,18 +1440,77 @@ onclick="shareHike(${index})"
    SHARE HIKE
    ===================================================== */
 
-async function shareHike(index){
+function openShareModal(index){
 
-const h =
+hikeBeingShared =
 hikes[index];
 
-
-if(!h){
+if(!hikeBeingShared){
 
 return;
 
 }
 
+const h =
+hikeBeingShared;
+
+
+const shareText =
+buildShareText(h);
+
+
+const photoHTML =
+h.photo
+?
+`
+<img
+class="share-photo"
+src="${h.photo}"
+>
+`
+:
+"";
+
+
+document
+.getElementById("sharePreview")
+.innerHTML = `
+
+<div class="share-preview">
+${esc(shareText)}
+</div>
+
+${photoHTML}
+
+`;
+
+
+document
+.getElementById("shareMessage")
+textContent =
+"";
+
+
+document
+.getElementById("shareModal")
+.classList.add("open");
+
+}
+
+
+function closeShareModal(){
+
+document
+.getElementById("shareModal")
+.classList.remove("open");
+
+hikeBeingShared =
+null;
+
+}
+
+
+function buildShareText(h){
 
 let text =
 "🥾 " +
@@ -1421,16 +1527,14 @@ h.location +
 
 }
 
-
 if(h.hike_date){
 
 text +=
 "📅 " +
-h.hike_date +
+formatDate(h.hike_date) +
 "\n";
 
 }
-
 
 if(h.distance){
 
@@ -1441,16 +1545,14 @@ h.distance +
 
 }
 
-
 if(h.elevation){
 
 text +=
 "⛰️ " +
 h.elevation +
-" m elevation\n";
+" m elevation gain\n";
 
 }
-
 
 if(h.pack){
 
@@ -1461,7 +1563,6 @@ h.pack +
 
 }
 
-
 if(h.difficulty){
 
 text +=
@@ -1470,7 +1571,6 @@ h.difficulty +
 "\n";
 
 }
-
 
 if(h.friends){
 
@@ -1481,7 +1581,6 @@ h.friends +
 
 }
 
-
 if(h.weather){
 
 text +=
@@ -1491,26 +1590,83 @@ h.weather +
 
 }
 
-
 if(h.notes){
 
 text +=
-"\n📝 " +
+"\n" +
 h.notes +
 "\n";
 
 }
 
+if(h.gear){
 
 text +=
-"\n🥾 Every trail has a story.\n— Cairn";
+"\n🎒 Gear: " +
+h.gear +
+"\n";
+
+}
+
+text +=
+"\n🥾 Every trail has a story. — Cairn";
+
+return text;
+
+}
 
 
-if(navigator.share){
+function formatDate(date){
+
+if(!date){
+
+return "";
+
+}
+
+const d =
+new Date(
+date + "T00:00:00"
+);
+
+return d.toLocaleDateString(
+undefined,
+{
+year:"numeric",
+month:"long",
+day:"numeric"
+}
+);
+
+}
+
+
+/* =====================================================
+   NATIVE PHONE / DESKTOP SHARING
+   ===================================================== */
+
+async function nativeShare(){
+
+if(!hikeBeingShared){
+
+return;
+
+}
+
+const h =
+hikeBeingShared;
+
+const text =
+buildShareText(h);
+
 
 try{
 
-await navigator.share({
+if(
+navigator.share
+){
+
+let shareData = {
 
 title:
 "🥾 " +
@@ -1518,37 +1674,247 @@ title:
 
 text:text
 
-});
+};
 
-}catch(error){
 
-if(error.name !== "AbortError"){
-
-alert(
-"Couldn't share this hike."
-);
-
-}
-
-}
-
-}else{
+if(
+h.photo &&
+navigator.canShare
+){
 
 try{
 
-await navigator.clipboard.writeText(text);
+const file =
+await dataUrlToFile(
+h.photo,
+"cairn-hike.jpg"
+);
 
-alert(
-"Hike copied! You can paste it into a text, email or message."
+if(
+file &&
+navigator.canShare({
+files:[file]
+})
+){
+
+shareData.files =
+[file];
+
+}
+
+}catch(e){
+
+console.log(
+"Photo sharing unavailable",
+e
+);
+
+}
+
+}
+
+
+await navigator.share(
+shareData
+);
+
+return;
+
+}
+
+
+await copyText(text);
+
+showShareMessage(
+"Post copied! You can paste it anywhere you like."
 );
 
 }catch(error){
 
-alert(text);
+if(
+error &&
+error.name === "AbortError"
+){
+
+return;
+
+}
+
+await copyText(text);
+
+showShareMessage(
+"Post copied! You can paste it into your hiking group."
+);
 
 }
 
 }
+
+
+/* =====================================================
+   FACEBOOK
+   ===================================================== */
+
+function shareFacebook(){
+
+const h =
+hikeBeingShared;
+
+if(!h){
+
+return;
+
+}
+
+
+/*
+Facebook does not allow a website to force
+a post into a particular group.
+
+Instead we open Facebook's share window.
+The user chooses where to post.
+*/
+
+const shareUrl =
+window.location.href;
+
+
+const facebookURL =
+"https://www.facebook.com/sharer/sharer.php?u=" +
+encodeURIComponent(shareUrl);
+
+
+window.open(
+facebookURL,
+"_blank",
+"width=700,height=600"
+);
+
+
+showShareMessage(
+"Facebook opened. Choose your hiking group there. You can use 'Copy post' below for the Cairn details."
+);
+
+}
+
+
+/* =====================================================
+   COPY FACEBOOK GROUP POST
+   ===================================================== */
+
+async function copyShareText(){
+
+if(!hikeBeingShared){
+
+return;
+
+}
+
+const text =
+buildShareText(
+hikeBeingShared
+);
+
+
+try{
+
+await copyText(text);
+
+showShareMessage(
+"✓ Copied! Open your Facebook hiking group and paste the post."
+);
+
+}catch(error){
+
+showShareMessage(
+"Couldn't copy automatically. Please select and copy the text above."
+);
+
+}
+
+}
+
+
+async function copyText(text){
+
+if(
+navigator.clipboard &&
+window.isSecureContext
+){
+
+await navigator.clipboard.writeText(
+text
+);
+
+return;
+
+}
+
+
+/* Older-browser fallback */
+
+const textarea =
+document.createElement("textarea");
+
+textarea.value =
+text;
+
+textarea.style.position =
+"fixed";
+
+textarea.style.left =
+"-9999px";
+
+document
+.body
+.appendChild(textarea);
+
+textarea.focus();
+textarea.select();
+
+document.execCommand(
+"copy"
+);
+
+textarea.remove();
+
+}
+
+
+function showShareMessage(message){
+
+document
+.getElementById("shareMessage")
+.textContent =
+message;
+
+}
+
+
+/* =====================================================
+   PHOTO CONVERSION FOR PHONE SHARING
+   ===================================================== */
+
+async function dataUrlToFile(
+dataUrl,
+fileName
+){
+
+const response =
+await fetch(dataUrl);
+
+const blob =
+await response.blob();
+
+return new File(
+[blob],
+fileName,
+{
+type:
+blob.type ||
+"image/jpeg"
+}
+);
 
 }
 
@@ -1563,7 +1929,6 @@ document
 .getElementById("hikeModal")
 .classList.add("open");
 
-
 document
 .getElementById("date")
 .value =
@@ -1571,9 +1936,7 @@ new Date()
 .toISOString()
 .split("T")[0];
 
-
 renderFriendChecklist();
-
 
 setTimeout(
 () =>
@@ -1605,7 +1968,6 @@ const box =
 document
 .getElementById("friendChecklist");
 
-
 if(!friends.length){
 
 box.innerHTML = `
@@ -1632,7 +1994,7 @@ friends
 
 <input
 type="checkbox"
-value="${esc(friend.id)}"
+value="${friend.id}"
 >
 
 <span>
@@ -1657,7 +2019,6 @@ const status =
 document
 .getElementById("gpsStatus");
 
-
 if(!navigator.geolocation){
 
 status.textContent =
@@ -1667,10 +2028,8 @@ return;
 
 }
 
-
 status.textContent =
 "Getting your location...";
-
 
 navigator.geolocation.getCurrentPosition(
 
@@ -1681,12 +2040,10 @@ document
 .value =
 position.coords.latitude.toFixed(6);
 
-
 document
 .getElementById("longitude")
 .value =
 position.coords.longitude.toFixed(6);
-
 
 status.textContent =
 "📍 Location captured!";
@@ -1701,13 +2058,9 @@ status.textContent =
 },
 
 {
-
 enableHighAccuracy:true,
-
 timeout:10000,
-
 maximumAge:0
-
 }
 
 );
@@ -1726,7 +2079,6 @@ document
 .getElementById("trail")
 .value
 .trim();
-
 
 if(!trail){
 
@@ -1750,7 +2102,7 @@ document
 
 const friend =
 friends.find(
-f => String(f.id) === String(box.value)
+f => f.id === box.value
 );
 
 if(friend){
@@ -1769,7 +2121,6 @@ document
 .getElementById("otherFriends")
 .value
 .trim();
-
 
 if(otherFriends){
 
@@ -1880,10 +2231,6 @@ await loadData();
 }
 
 
-/* =====================================================
-   NUMBER HELPER
-   ===================================================== */
-
 function numberOrNull(id){
 
 const value =
@@ -1892,13 +2239,11 @@ document
 .value
 .trim();
 
-
 if(value === ""){
 
 return null;
 
 }
-
 
 return Number(value);
 
@@ -1914,17 +2259,14 @@ function previewPhoto(event){
 const file =
 event.target.files[0];
 
-
 if(!file){
 
 return;
 
 }
 
-
 const reader =
 new FileReader();
-
 
 reader.onload =
 function(e){
@@ -1933,16 +2275,13 @@ const img =
 document
 .getElementById("photoPreview");
 
-
 img.src =
 e.target.result;
-
 
 img.style.display =
 "block";
 
 };
-
 
 reader.readAsDataURL(file);
 
@@ -2045,7 +2384,6 @@ const box =
 document
 .getElementById("friendsList");
 
-
 if(!friends.length){
 
 box.innerHTML = `
@@ -2100,7 +2438,7 @@ ${esc(friend.note)}
 <div class="friend-actions">
 
 <button
-onclick="editFriend('${esc(friend.id)}')"
+onclick="editFriend('${friend.id}')"
 >
 ✏️ Edit
 </button>
@@ -2108,7 +2446,7 @@ onclick="editFriend('${esc(friend.id)}')"
 
 <button
 class="delete"
-onclick="deleteFriend('${esc(friend.id)}')"
+onclick="deleteFriend('${friend.id}')"
 >
 🗑 Delete
 </button>
@@ -2132,29 +2470,24 @@ function openFriendForm(){
 editingFriendId =
 null;
 
-
 document
 .getElementById("friendFormTitle")
 .textContent =
 "Add Friend";
-
 
 document
 .getElementById("friendName")
 .value =
 "";
 
-
 document
 .getElementById("friendNote")
 .value =
 "";
 
-
 document
 .getElementById("friendFormModal")
 .classList.add("open");
-
 
 setTimeout(
 () =>
@@ -2171,9 +2504,8 @@ function editFriend(id){
 
 const friend =
 friends.find(
-f => String(f.id) === String(id)
+f => f.id === id
 );
-
 
 if(!friend){
 
@@ -2181,28 +2513,23 @@ return;
 
 }
 
-
 editingFriendId =
 id;
-
 
 document
 .getElementById("friendFormTitle")
 .textContent =
 "Edit Friend";
 
-
 document
 .getElementById("friendName")
 .value =
 friend.name;
 
-
 document
 .getElementById("friendNote")
 .value =
 friend.note || "";
-
 
 document
 .getElementById("friendFormModal")
@@ -2228,13 +2555,11 @@ document
 .value
 .trim();
 
-
 const note =
 document
 .getElementById("friendNote")
 .value
 .trim();
-
 
 if(!name){
 
@@ -2258,7 +2583,6 @@ await db
 .update({
 
 name:name,
-
 note:note
 
 })
@@ -2275,7 +2599,6 @@ await db
 .insert({
 
 name:name,
-
 note:note
 
 });
@@ -2308,16 +2631,14 @@ async function deleteFriend(id){
 
 const friend =
 friends.find(
-f => String(f.id) === String(id)
+f => f.id === id
 );
-
 
 if(!friend){
 
 return;
 
 }
-
 
 if(
 !confirm(
@@ -2342,7 +2663,6 @@ await db
 "id",
 id
 );
-
 
 if(error){
 
@@ -2372,7 +2692,6 @@ function showStats(){
 const count =
 hikes.length;
 
-
 const distance =
 hikes.reduce(
 (sum,h) =>
@@ -2380,7 +2699,6 @@ sum +
 (Number(h.distance) || 0),
 0
 );
-
 
 const elevation =
 hikes.reduce(
@@ -2453,7 +2771,7 @@ notes
 
 function esc(value){
 
-return String(value ?? "")
+return String(value)
 .replace(
 /[&<>"']/g,
 
@@ -2475,3 +2793,4 @@ char => ({
 
 </body>
 </html>
+```
