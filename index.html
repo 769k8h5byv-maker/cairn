@@ -1,4 +1,3 @@
-```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -67,6 +66,7 @@ header p{
   color:white;
   padding:7px 11px;
   border-radius:8px;
+  cursor:pointer;
 }
 
 main{
@@ -334,20 +334,23 @@ textarea{
   color:white;
   text-align:center;
   text-decoration:none;
+  cursor:pointer;
+  font-size:15px;
 }
 
 .share-button{
   display:block;
-  margin-top:8px;
+  margin-top:10px;
   width:100%;
   padding:11px;
-  border:1px solid var(--line);
+  border:1px solid var(--accent);
   border-radius:10px;
-  background:#f5f8f5;
+  background:#e6eee8;
   color:var(--accent);
+  text-align:center;
+  cursor:pointer;
   font-size:15px;
   font-weight:650;
-  cursor:pointer;
 }
 
 .gps-button{
@@ -393,6 +396,7 @@ textarea{
 <body>
 
 <header>
+
 <div class="brand">
 
 <div class="logo">🥾</div>
@@ -412,6 +416,7 @@ Log out
 </div>
 
 </div>
+
 </header>
 
 
@@ -654,6 +659,7 @@ Save Hike
 </div>
 
 </div>
+
 </div>
 
 
@@ -683,6 +689,7 @@ onclick="openFriendForm()"
 </div>
 
 </div>
+
 </div>
 
 
@@ -731,10 +738,12 @@ Save Friend
 </div>
 
 </div>
+
 </div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <script>
 
@@ -748,6 +757,7 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable__ad1TkvwWaMbTdpFf4o0tg_7BfOpo-W";
 
+
 const db =
 supabase.createClient(
 SUPABASE_URL,
@@ -760,6 +770,7 @@ SUPABASE_KEY
    ===================================================== */
 
 let hikes = [];
+
 let friends = [];
 
 let editingFriendId = null;
@@ -981,6 +992,7 @@ document
 .getElementById("loginModal")
 .classList.remove("open");
 
+
 document
 .querySelector(".fab")
 .style.display =
@@ -1064,7 +1076,9 @@ onclick="showGear()"
 
 
 <div class="section-title">
+
 <h2>Recent hikes</h2>
+
 </div>
 
 <div id="hikes"></div>
@@ -1217,9 +1231,11 @@ hikes
 ${esc(h.trail)}
 </div>
 
+
 <div class="hike-location">
 📍 ${esc(h.location || "Location not entered")}
 </div>
+
 
 <div class="badge">
 ${esc(h.difficulty || "Difficulty not entered")}
@@ -1229,24 +1245,35 @@ ${esc(h.difficulty || "Difficulty not entered")}
 <div class="stats">
 
 <div class="stat">
+
 <strong>
 ${esc(h.distance || "—")}
 </strong>
+
 <span>KM</span>
+
 </div>
 
+
 <div class="stat">
+
 <strong>
 ${esc(h.elevation || "—")}
 </strong>
+
 <span>METRES</span>
+
 </div>
 
+
 <div class="stat">
+
 <strong>
 ${esc(h.pack || "—")}
 </strong>
+
 <span>LB PACK</span>
+
 </div>
 
 </div>
@@ -1257,8 +1284,10 @@ h.friends
 ?
 `
 <div class="note">
+
 👥 <b>With:</b>
 ${esc(h.friends)}
+
 </div>
 `
 :
@@ -1271,7 +1300,9 @@ h.weather
 ?
 `
 <div class="note">
+
 🌦️ ${esc(h.weather)}
+
 </div>
 `
 :
@@ -1284,7 +1315,9 @@ h.notes
 ?
 `
 <div class="note">
+
 📝 ${esc(h.notes)}
+
 </div>
 `
 :
@@ -1297,8 +1330,10 @@ h.gear
 ?
 `
 <div class="note">
+
 🎒 <b>Gear:</b>
 ${esc(h.gear)}
+
 </div>
 `
 :
@@ -1311,7 +1346,7 @@ h.photo
 ?
 `
 <img
-src="${h.photo}"
+src="${esc(h.photo)}"
 style="width:100%;margin-top:12px;border-radius:12px"
 >
 `
@@ -1342,7 +1377,7 @@ target="_blank"
 class="share-button"
 onclick="shareHike(${index})"
 >
-🌲 Share Hike with Hiking Buds
+🥾 Share Hike
 </button>
 
 
@@ -1360,212 +1395,158 @@ onclick="shareHike(${index})"
 
 async function shareHike(index){
 
-const hike =
+const h =
 hikes[index];
 
 
-if(!hike){
+if(!h){
 
 return;
 
 }
 
 
-let shareText =
-"🥾 Cairn — " +
-(hike.trail || "Hike") +
+let text =
+"🥾 " +
+(h.trail || "My Hike") +
 "\n\n";
 
 
-if(hike.location){
+if(h.location){
 
-shareText +=
+text +=
 "📍 " +
-hike.location +
+h.location +
 "\n";
 
 }
 
 
-if(hike.hike_date){
+if(h.hike_date){
 
-shareText +=
+text +=
 "📅 " +
-hike.hike_date +
+h.hike_date +
 "\n";
 
 }
 
 
-if(hike.distance){
+if(h.distance){
 
-shareText +=
+text +=
 "📏 " +
-hike.distance +
+h.distance +
 " km\n";
 
 }
 
 
-if(hike.elevation){
+if(h.elevation){
 
-shareText +=
+text +=
 "⛰️ " +
-hike.elevation +
+h.elevation +
 " m elevation\n";
 
 }
 
 
-if(hike.pack){
+if(h.pack){
 
-shareText +=
+text +=
 "🎒 " +
-hike.pack +
+h.pack +
 " lb pack\n";
 
 }
 
 
-if(hike.difficulty){
+if(h.difficulty){
 
-shareText +=
-"🥾 Difficulty: " +
-hike.difficulty +
+text +=
+"💪 " +
+h.difficulty +
 "\n";
 
 }
 
 
-if(hike.friends){
+if(h.friends){
 
-shareText +=
+text +=
 "👥 With: " +
-hike.friends +
+h.friends +
 "\n";
 
 }
 
 
-if(hike.weather){
+if(h.weather){
 
-shareText +=
+text +=
 "🌦️ " +
-hike.weather +
+h.weather +
 "\n";
 
 }
 
 
-if(hike.notes){
+if(h.notes){
 
-shareText +=
+text +=
 "\n📝 " +
-hike.notes +
+h.notes +
 "\n";
 
 }
 
 
-if(hike.gear){
+text +=
+"\n🥾 Every trail has a story.\n— Cairn";
 
-shareText +=
-"\n🎒 Gear: " +
-hike.gear +
-"\n";
-
-}
-
-
-if(hike.latitude && hike.longitude){
-
-const mapUrl =
-"https://www.google.com/maps/search/?api=1&query=" +
-encodeURIComponent(
-hike.latitude + "," + hike.longitude
-);
-
-shareText +=
-"\n🗺️ Trailhead:\n" +
-mapUrl +
-"\n";
-
-}
-
-
-shareText +=
-"\n🌲 Shared from Cairn — Every trail has a story.";
-
-
-try{
 
 if(navigator.share){
+
+try{
 
 await navigator.share({
 
 title:
-"Cairn — " +
-(hike.trail || "My Hike"),
+"🥾 " +
+(h.trail || "My Hike"),
 
-text:
-shareText
+text:text
 
 });
-
-}else{
-
-await copyShareText(shareText);
-
-}
 
 }catch(error){
 
 if(error.name !== "AbortError"){
 
-await copyShareText(shareText);
+alert(
+"Couldn't share this hike."
+);
 
 }
 
 }
 
-}
-
-
-/* =====================================================
-   COPY SHARE TEXT
-   ===================================================== */
-
-async function copyShareText(text){
+}else{
 
 try{
 
 await navigator.clipboard.writeText(text);
 
 alert(
-"🌲 Hike copied!\n\n" +
-"Paste it into a message to your hiking bud."
+"Hike copied! You can paste it into a text, email or message."
 );
 
 }catch(error){
 
-const temp =
-document.createElement("textarea");
+alert(text);
 
-temp.value =
-text;
-
-document.body.appendChild(temp);
-
-temp.select();
-
-document.execCommand("copy");
-
-temp.remove();
-
-alert(
-"🌲 Hike copied!\n\n" +
-"Paste it into a message to your hiking bud."
-);
+}
 
 }
 
@@ -1651,7 +1632,7 @@ friends
 
 <input
 type="checkbox"
-value="${friend.id}"
+value="${esc(friend.id)}"
 >
 
 <span>
@@ -1720,9 +1701,13 @@ status.textContent =
 },
 
 {
+
 enableHighAccuracy:true,
+
 timeout:10000,
+
 maximumAge:0
+
 }
 
 );
@@ -1765,7 +1750,7 @@ document
 
 const friend =
 friends.find(
-f => f.id === box.value
+f => String(f.id) === String(box.value)
 );
 
 if(friend){
@@ -1894,6 +1879,10 @@ await loadData();
 
 }
 
+
+/* =====================================================
+   NUMBER HELPER
+   ===================================================== */
 
 function numberOrNull(id){
 
@@ -2111,7 +2100,7 @@ ${esc(friend.note)}
 <div class="friend-actions">
 
 <button
-onclick="editFriend('${friend.id}')"
+onclick="editFriend('${esc(friend.id)}')"
 >
 ✏️ Edit
 </button>
@@ -2119,7 +2108,7 @@ onclick="editFriend('${friend.id}')"
 
 <button
 class="delete"
-onclick="deleteFriend('${friend.id}')"
+onclick="deleteFriend('${esc(friend.id)}')"
 >
 🗑 Delete
 </button>
@@ -2182,7 +2171,7 @@ function editFriend(id){
 
 const friend =
 friends.find(
-f => f.id === id
+f => String(f.id) === String(id)
 );
 
 
@@ -2269,6 +2258,7 @@ await db
 .update({
 
 name:name,
+
 note:note
 
 })
@@ -2285,6 +2275,7 @@ await db
 .insert({
 
 name:name,
+
 note:note
 
 });
@@ -2317,7 +2308,7 @@ async function deleteFriend(id){
 
 const friend =
 friends.find(
-f => f.id === id
+f => String(f.id) === String(id)
 );
 
 
@@ -2462,7 +2453,7 @@ notes
 
 function esc(value){
 
-return String(value)
+return String(value ?? "")
 .replace(
 /[&<>"']/g,
 
@@ -2484,4 +2475,3 @@ char => ({
 
 </body>
 </html>
-```
